@@ -365,7 +365,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <div id="pane-admin" style="display:none">
       <div class="fg"><label>管理者メール</label><input type="email" id="a-email"></div>
       <div class="fg"><label>パスワード</label><input type="password" id="a-pass" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
-      <button class="btn-p" onclick="loginAdmin()">管理者ログイン</button>
+      <button class="btn-p" id="btn-admin-login" onclick="loginAdmin()">管理者ログイン</button>
     </div>
     <div id="pane-register" style="display:none">
       <div class="fg"><label>メールアドレス</label><input type="email" id="r-email"></div>
@@ -504,8 +504,7 @@ const firebaseConfig = {
   messagingSenderId: "296317121668",
   appId: "1:296317121668:web:7cddabe6cb6e81f041bed1"
 };
-//const ADMIN_EMAILS = ["admin@example.com"];
-const ADMIN_EMAILS = ["takeuchi@power-h.co.jp", "pht@power-h.co.jp"];
+// 管理者判定はFirestoreのrole:"admin"フィールドで行う
 
 // ===== カテゴリ定義 =====
 // mode: fixed=固定問題, review=復習問題, challenge=チャレンジ, random=ランダム
@@ -591,7 +590,7 @@ onAuthStateChanged(auth, async user=>{
     const snap = await getDoc(doc(db,'users',user.uid));
     if (snap.exists()) {
       currentUser = { uid:user.uid, ...snap.data() };
-      currentRole = ADMIN_EMAILS.includes(user.email)?'admin':'learner';
+      currentRole = snap.data().role || 'learner';
       currentUser.role = currentRole;
       await loadQuestions();
       initApp();
@@ -605,7 +604,7 @@ onAuthStateChanged(auth, async user=>{
       }
       if(retrySnap && retrySnap.exists()){
         currentUser = { uid:user.uid, ...retrySnap.data() };
-        currentRole = ADMIN_EMAILS.includes(user.email)?'admin':'learner';
+        currentRole = retrySnap.data().role || 'learner';
         currentUser.role = currentRole;
         await loadQuestions();
         initApp();
@@ -647,7 +646,7 @@ window.showPane = p=>{
 window.loginLearner = async()=>{
   const email=document.getElementById('l-email').value.trim(), pass=document.getElementById('l-pass').value;
   if(!email||!pass) return setErr('入力してください');
-  if(ADMIN_EMAILS.includes(email)) return setErr('管理者タブからログインしてください');
+  // role判定はログイン後にFirestoreで行う
   setLoading('btn-login', true);
   try{
     await signInWithEmailAndPassword(auth,email,pass);
@@ -658,15 +657,28 @@ window.loginLearner = async()=>{
 };
 window.loginAdmin = async()=>{
   const email=document.getElementById('a-email').value.trim(), pass=document.getElementById('a-pass').value;
-  if(!ADMIN_EMAILS.includes(email)) return setErr('管理者権限がありません');
-  try{ await signInWithEmailAndPassword(auth,email,pass); }catch(e){ setErr(authErr(e.code)); }
+  if(!email||!pass) return setErr('入力してください');
+  setLoading('btn-admin-login', true);
+  try{
+    const cred = await signInWithEmailAndPassword(auth,email,pass);
+    // ログイン後にFirestoreでrole確認
+    const snap = await getDoc(doc(db,'users',cred.user.uid));
+    if(!snap.exists() || snap.data().role !== 'admin'){
+      await signOut(auth);
+      setLoading('btn-admin-login', false);
+      return setErr('管理者権限がありません');
+    }
+  }catch(e){
+    setLoading('btn-admin-login', false);
+    setErr(authErr(e.code));
+  }
 };
 window.registerLearner = async()=>{
   const email=document.getElementById('r-email').value.trim(),
         pass=document.getElementById('r-pass').value;
   if(!email||!pass) return setErr('すべて入力してください');
   if(pass.length<6) return setErr('パスワードは6文字以上');
-  if(ADMIN_EMAILS.includes(email)) return setErr('このメールは使用できません');
+  // role判定はFirestoreで管理
   setLoading('btn-register', true);
   try{
     // ① allowed_usersにメールアドレスが存在するか確認
@@ -724,7 +736,14 @@ window.registerLearner = async()=>{
     setLoading('btn-register', false);
   }
 };
-window.logout = async()=>{ await signOut(auth); toast('ログアウトしました','success'); };
+window.logout = async()=>{
+  await signOut(auth);
+  // ローディング状態をリセット
+  setLoading('btn-login', false);
+  setLoading('btn-register', false);
+  setLoading('btn-admin-login', false);
+  toast('ログアウトしました','success');
+};
 
 // ===== APP INIT =====
 function initApp() {
