@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS Training System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap');
+:root {
+  /* ── ベース ── */
+  --bg:#1e2a3a; --surface:#28374a; --surface2:#304055; --surface3:#384a62;
+  --border:#445566; --text:#eef4ff; --muted:#8aadcc; --radius:10px;
+  --mono:'IBM Plex Mono',monospace; --sans:'Zen Kaku Gothic New',sans-serif;
+  /* ① 固定問題：シアンブルー */
+  --c-fixed:#00c8f0; --c-fixed-bg:rgba(0,200,240,.07); --c-fixed-border:rgba(0,200,240,.38);
+  /* ② 復習問題：アンバーオレンジ */
+  --c-review:#ffaa00; --c-review-bg:rgba(255,170,0,.07); --c-review-border:rgba(255,170,0,.38);
+  /* ③ チャレンジ：コーラルレッド */
+  --c-challenge:#ff4d6d; --c-challenge-bg:rgba(255,77,109,.07); --c-challenge-border:rgba(255,77,109,.38);
+  /* ④ ランダム：バイオレット */
+  --c-random:#c084fc; --c-random-bg:rgba(192,132,252,.07); --c-random-border:rgba(192,132,252,.38);
+  /* 汎用 */
+  --accent:#00c8f0; --accent2:#00f0a0; --warn:#ff4d6d; --gold:#ffaa00;
+  --purple:#c084fc; --orange:#ffaa00; --pink:#ff4d6d;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;}
+
+/* ── LOGIN ── */
+#screen-login{align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden;}
+#screen-login::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 20% 30%,rgba(0,212,255,.08) 0%,transparent 70%),
+             radial-gradient(ellipse 50% 60% at 80% 70%,rgba(0,255,157,.05) 0%,transparent 70%);
+  pointer-events:none;}
+.grid-bg{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;}
+.login-card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:48px 44px;width:100%;max-width:440px;
+  box-shadow:0 0 60px rgba(0,212,255,.06),0 30px 60px rgba(0,0,0,.5);}
+.logo{text-align:center;margin-bottom:36px;}
+.logo-mark{display:inline-flex;align-items:center;justify-content:center;
+  width:64px;height:64px;border-radius:16px;
+  background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(0,255,157,.1));
+  border:1px solid rgba(0,212,255,.3);font-size:28px;margin-bottom:14px;
+  box-shadow:0 0 30px rgba(0,212,255,.15);}
+.logo h1{font-family:var(--mono);font-size:20px;color:var(--accent);letter-spacing:3px;}
+.logo p{color:var(--muted);font-size:13px;margin-top:5px;}
+.tab-bar{display:flex;background:var(--bg);border-radius:var(--radius);padding:4px;margin-bottom:28px;}
+.tab-bar button{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);
+  border-radius:7px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:500;transition:.2s;}
+.tab-bar button.active{background:var(--surface2);color:var(--text);}
+.fg{margin-bottom:18px;}
+.fg label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px;letter-spacing:1.5px;text-transform:uppercase;}
+.fg input{width:100%;padding:13px 16px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:15px;font-family:var(--sans);transition:.2s;}
+.fg input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1);}
+.btn-p{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#0099bb);
+  border:none;border-radius:var(--radius);color:#000;font-size:15px;font-weight:700;
+  cursor:pointer;transition:.2s;font-family:var(--sans);}
+.btn-p:hover{opacity:.9;transform:translateY(-1px);}
+.btn-s{padding:10px 22px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);cursor:pointer;font-family:var(--sans);font-size:14px;transition:.2s;}
+.btn-s:hover{border-color:var(--accent);color:var(--accent);}
+.err{color:var(--warn);font-size:13px;margin-top:12px;text-align:center;min-height:18px;}
+.link-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-family:var(--sans);font-size:13px;}
+
+/* ── APP ── */
+#screen-app{flex-direction:column;}
+.topbar{background:#18253a;border-bottom:1px solid var(--border);padding:0 28px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-family:var(--mono);color:var(--accent);font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.role-badge{font-size:11px;padding:3px 10px;border-radius:20px;
+  background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.25);font-weight:600;}
+.role-badge.admin{background:rgba(255,209,102,.1);color:var(--gold);border-color:rgba(255,209,102,.3);}
+.topbar-r{display:flex;align-items:center;gap:14px;}
+.uname{font-size:13px;color:var(--muted);}
+.btn-logout{padding:6px 14px;background:transparent;border:1px solid var(--border);
+  border-radius:6px;color:var(--muted);cursor:pointer;font-size:13px;transition:.2s;font-family:var(--sans);}
+.btn-logout:hover{border-color:var(--warn);color:var(--warn);}
+.app-body{display:flex;flex:1;min-height:calc(100vh - 56px);}
+
+/* ── SIDEBAR ── */
+.sidebar{width:240px;background:#18253a;border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;}
+.nav-sec{padding:4px 12px 6px;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-top:10px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:13px 22px;cursor:pointer;transition:.15s;
+  font-size:15px;color:var(--muted);border-left:3px solid transparent;margin:2px 0;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--surface2);color:var(--accent);border-left-color:var(--accent);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:36px 40px;background:#243447;}
+.panel{display:none;} .panel.active{display:block;}
+.page-title{font-size:27px;font-weight:700;margin-bottom:6px;}
+.page-sub{color:var(--muted);font-size:15px;margin-bottom:36px;}
+
+/* ── MODE CARDS ── */
+.mode-block{margin-bottom:36px;}
+.mode-header{display:flex;align-items:center;gap:14px;padding:20px 24px;border-radius:14px 14px 0 0;border:2px solid;border-bottom:none;}
+.mode-header-icon{font-size:32px;}
+.mode-header-title{font-size:18px;font-weight:700;}
+.mode-header-desc{font-size:13px;opacity:.7;margin-top:3px;}
+.mode-body{border:2px solid;border-top:none;border-radius:0 0 14px 14px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+/* 色テーマ */
+.mode-fixed .mode-header{background:linear-gradient(135deg,rgba(0,212,255,.1),rgba(0,212,255,.05));border-color:var(--accent);}
+.mode-fixed .mode-body{background:rgba(0,212,255,.02);border-color:var(--accent);}
+.mode-review .mode-header{background:linear-gradient(135deg,rgba(255,159,67,.1),rgba(255,159,67,.05));border-color:var(--orange);}
+.mode-review .mode-body{background:rgba(255,159,67,.02);border-color:var(--orange);}
+.mode-challenge .mode-header{background:linear-gradient(135deg,rgba(255,107,107,.1),rgba(255,107,107,.05));border-color:var(--warn);}
+.mode-challenge .mode-body{background:rgba(255,107,107,.02);border-color:var(--warn);}
+.mode-random .mode-header{background:linear-gradient(135deg,rgba(179,136,255,.1),rgba(179,136,255,.05));border-color:var(--purple);}
+.mode-random .mode-body{background:rgba(179,136,255,.02);border-color:var(--purple);}
+
+/* カテゴリカード */
+.cat-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;cursor:pointer;transition:.2s;}
+.cat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.cc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cc-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.cc-total{font-size:12px;color:var(--muted);}
+.cc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.cc-stat{text-align:center;background:var(--surface);border-radius:6px;padding:8px 4px;}
+.cc-stat-n{font-family:var(--mono);font-size:16px;font-weight:600;}
+.cc-stat-l{font-size:10px;color:var(--muted);margin-top:2px;}
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .6s;}
+.prog-fill.js_basic{background:linear-gradient(90deg,var(--accent),#0099bb);}
+.prog-fill.dom{background:linear-gradient(90deg,var(--accent2),#00cc7a);}
+.prog-fill.java_review{background:linear-gradient(90deg,var(--orange),#e07b00);}
+.prog-fill.db_review{background:linear-gradient(90deg,var(--gold),#ffb300);}
+.prog-fill.java_challenge{background:linear-gradient(90deg,var(--warn),#cc3333);}
+.prog-fill.db_challenge{background:linear-gradient(90deg,var(--pink),#cc4477);}
+.prog-pct{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;margin-top:3px;}
+
+/* ランダムカード */
+.rand-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;
+  cursor:pointer;transition:.2s;display:flex;align-items:center;gap:14px;}
+.rand-card:hover{transform:translateY(-2px);border-color:var(--purple);}
+.rc-icon{font-size:28px;flex-shrink:0;}
+.rc-title{font-size:14px;font-weight:700;}
+.rc-desc{font-size:12px;color:var(--muted);margin-top:3px;}
+.rc-count{font-family:var(--mono);font-size:12px;color:var(--purple);margin-top:4px;}
+
+/* 受講回数バッジ */
+.lap-badge{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(255,209,102,.15);color:var(--gold);border:1px solid rgba(255,209,102,.3);font-weight:600;}
+
+/* ── QUIZ ── */
+.quiz-top{display:flex;align-items:center;gap:14px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.quiz-pbar-wrap{flex:1;}
+.quiz-pbar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.quiz-pbar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s;}
+.quiz-lbl{font-family:var(--mono);font-size:13px;color:var(--muted);white-space:nowrap;}
+.quiz-mode-tag{font-size:11px;padding:4px 12px;border-radius:20px;font-weight:700;letter-spacing:.5px;white-space:nowrap;}
+.quiz-mode-tag.fixed   {background:var(--c-fixed-bg);color:var(--c-fixed);border:1px solid var(--c-fixed-border);}
+.quiz-mode-tag.review  {background:var(--c-review-bg);color:var(--c-review);border:1px solid var(--c-review-border);}
+.quiz-mode-tag.challenge{background:var(--c-challenge-bg);color:var(--c-challenge);border:1px solid var(--c-challenge-border);}
+.quiz-mode-tag.random  {background:var(--c-random-bg);color:var(--c-random);border:1px solid var(--c-random-border);}
+
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;margin-bottom:20px;}
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;}
+.badge-js_basic{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.badge-dom{background:rgba(0,255,157,.1);color:var(--accent2);border:1px solid rgba(0,255,157,.2);}
+.badge-java,.badge-java_review,.badge-java_challenge,
+.badge-java_challenge_pool,.badge-java_basic_pool,.badge-java_mid_pool{background:rgba(255,159,67,.1);color:var(--orange);border:1px solid rgba(255,159,67,.25);}
+.badge-db,.badge-db_review,.badge-db_challenge,
+.badge-db_challenge_pool,.badge-db_basic_pool,.badge-db_mid_pool{background:rgba(255,209,102,.1);color:var(--gold);border:1px solid rgba(255,209,102,.25);}
+.badge-js_basic_pool,.badge-js_mid_pool{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.badge-dom_pool{background:rgba(0,255,157,.1);color:var(--accent2);border:1px solid rgba(0,255,157,.2);}
+.badge-truefalse{background:rgba(0,212,255,.08);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.badge-fillblank{background:rgba(179,136,255,.1);color:var(--purple);border:1px solid rgba(179,136,255,.25);}
+.badge-essay{background:rgba(255,209,102,.08);color:var(--gold);border:1px solid rgba(255,209,102,.2);}
+.q-num{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto;}
+.q-text{font-size:21px;line-height:1.9;font-weight:500;margin-bottom:32px;}
+.tf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tf-btn{padding:26px 20px;border:2px solid var(--border);border-radius:var(--radius);
+  background:var(--surface2);color:var(--text);font-size:26px;cursor:pointer;transition:.2s;font-family:var(--sans);
+  display:flex;flex-direction:column;align-items:center;gap:8px;}
+.tf-btn .tfl{font-size:15px;color:var(--muted);}
+.tf-btn:hover{border-color:var(--accent);}
+.tf-btn.sel-t{border-color:var(--accent2);background:rgba(0,255,157,.08);}
+.tf-btn.sel-f{border-color:var(--warn);background:rgba(255,107,107,.08);}
+.tf-btn.correct{border-color:var(--accent2)!important;background:rgba(0,255,157,.12)!important;}
+.tf-btn.wrong{border-color:var(--warn)!important;background:rgba(255,107,107,.1)!important;}
+.fill-input{width:100%;padding:16px 20px;background:var(--bg);border:2px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:19px;font-family:var(--mono);transition:.2s;}
+.fill-input:focus{outline:none;border-color:var(--accent);}
+.essay-input{width:100%;padding:14px 18px;background:var(--bg);border:2px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:14px;font-family:var(--mono);
+  min-height:160px;resize:vertical;line-height:1.7;transition:.2s;}
+.essay-input:focus{outline:none;border-color:var(--accent);}
+.q-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+.btn-submit{padding:14px 36px;background:linear-gradient(135deg,var(--accent),#0088aa);
+  border:none;border-radius:var(--radius);color:#000;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;font-family:var(--sans);}
+.btn-submit:hover{opacity:.9;}
+.btn-next{padding:14px 36px;background:linear-gradient(135deg,var(--accent2),#00aa6e);
+  border:none;border-radius:var(--radius);color:#000;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;font-family:var(--sans);}
+.btn-next:hover{opacity:.9;}
+.btn-skip{padding:12px 20px;background:transparent;border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);transition:.2s;}
+.btn-skip:hover{border-color:var(--muted);color:var(--text);}
+.explanation{border-radius:var(--radius);padding:20px 22px;margin-top:16px;display:none;
+  border-left:4px solid var(--border);background:var(--surface);}
+.explanation.correct{border-left-color:var(--accent2);}
+.explanation.wrong{border-left-color:var(--warn);}
+.explanation.essay{border-left-color:var(--gold);}
+.exp-status{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.explanation.correct .exp-status{color:var(--accent2);}
+.explanation.wrong .exp-status{color:var(--warn);}
+.explanation.essay .exp-status{color:var(--gold);}
+.exp-answer{font-family:var(--mono);font-size:13px;background:var(--bg);padding:12px 16px;
+  border-radius:6px;margin-bottom:12px;white-space:pre-wrap;border:1px solid var(--border);}
+.exp-text{font-size:15px;color:var(--muted);line-height:1.9;}
+
+/* ── RESULT ── */
+.result-wrap{max-width:680px;margin:0 auto;}
+.result-hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:44px;text-align:center;margin-bottom:20px;}
+.result-pct{font-family:var(--mono);font-size:96px;font-weight:600;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.result-sub{color:var(--muted);font-size:15px;margin:10px 0 28px;}
+.result-bd{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.rb{background:var(--surface2);border-radius:var(--radius);padding:16px;}
+.rb-n{font-family:var(--mono);font-size:26px;font-weight:600;}
+.rb-n.c{color:var(--accent2);} .rb-n.w{color:var(--warn);} .rb-n.s{color:var(--muted);}
+.rb-l{font-size:12px;color:var(--muted);margin-top:2px;}
+.result-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.ans-list{display:flex;flex-direction:column;gap:8px;margin-top:20px;}
+.ans-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;border-left:4px solid var(--border);}
+.ans-item.ok{border-left-color:var(--accent2);} .ans-item.ng{border-left-color:var(--warn);}
+.ans-item.sk{border-left-color:var(--muted);} .ans-item.es{border-left-color:var(--gold);}
+.ans-q{font-size:13px;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ans-a{font-family:var(--mono);font-size:12px;}
+.s-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.s-badge.ok{background:rgba(0,255,157,.15);color:var(--accent2);}
+.s-badge.ng{background:rgba(255,107,107,.15);color:var(--warn);}
+.s-badge.sk{background:rgba(107,143,168,.15);color:var(--muted);}
+.s-badge.es{background:rgba(255,209,102,.15);color:var(--gold);}
+
+/* ── PROGRESS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.stat-num{font-family:var(--mono);font-size:34px;font-weight:600;color:var(--accent);}
+.stat-label{font-size:13px;color:var(--muted);margin-top:6px;}
+.prog-cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;}
+.pcc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.pcc-title{font-size:15px;font-weight:700;}
+.pcc-laps{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.lap-item{font-size:11px;padding:3px 10px;border-radius:10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.lap-item.current{background:rgba(255,209,102,.15);color:var(--gold);border-color:rgba(255,209,102,.3);}
+.pcc-nums{font-family:var(--mono);font-size:13px;color:var(--muted);}
+.pcc-nums span{color:var(--text);font-weight:600;}
+.pcc-detail{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.pcd{text-align:center;background:var(--surface2);border-radius:6px;padding:10px;}
+.pcd-n{font-family:var(--mono);font-size:22px;font-weight:600;}
+.pcd-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.history-table{width:100%;border-collapse:collapse;font-size:14px;}
+.history-table th{background:var(--surface2);padding:10px 14px;text-align:left;
+  font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);}
+.history-table td{padding:10px 14px;border-bottom:1px solid rgba(36,52,71,.5);}
+
+/* ── DIARY ── */
+.diary-form-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px;}
+.diary-form-title{font-size:15px;font-weight:700;color:var(--accent);margin-bottom:20px;}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.fg-d label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px;letter-spacing:1px;text-transform:uppercase;}
+.fg-d input,.fg-d textarea{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:14px;font-family:var(--sans);transition:.2s;}
+.fg-d input:focus,.fg-d textarea:focus{outline:none;border-color:var(--accent);}
+.fg-d textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.stars{display:flex;gap:6px;font-size:26px;cursor:pointer;margin:6px 0;}
+.star{color:var(--border);transition:color .12s;}
+.star.on{color:var(--gold);}
+.diary-entries{display:flex;flex-direction:column;gap:12px;}
+.diary-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+.de-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.de-date{font-family:var(--mono);font-size:13px;color:var(--muted);}
+.de-rating{color:var(--gold);font-size:14px;}
+.de-body p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:4px;}
+.de-body strong{color:var(--text);}
+
+/* ── ADMIN ── */
+.user-cards{display:flex;flex-direction:column;gap:10px;}
+.user-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 22px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:space-between;}
+.user-card:hover{border-color:var(--accent);}
+.uc-l{display:flex;align-items:center;gap:14px;}
+.avatar{width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#000;flex-shrink:0;}
+.uc-name{font-size:15px;font-weight:600;}
+.uc-email{font-size:12px;color:var(--muted);margin-top:2px;}
+.uc-r{display:flex;gap:18px;}
+.uc-s{text-align:center;}
+.uc-sn{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--accent);}
+.uc-sl{font-size:11px;color:var(--muted);}
+.back-btn{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--accent);
+  margin-bottom:22px;font-size:14px;background:none;border:none;font-family:var(--sans);}
+.admin-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.atab{padding:10px 22px;background:transparent;border:none;color:var(--muted);cursor:pointer;
+  font-family:var(--sans);font-size:14px;border-bottom:2px solid transparent;transition:.2s;margin-bottom:-1px;}
+.atab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.atab-panel{display:none;} .atab-panel.active{display:block;}
+
+/* ── TOAST / LOADING ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 20px;font-size:14px;transform:translateY(80px);opacity:0;transition:.3s;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-left:4px solid var(--accent2);}
+.toast.error{border-left:4px solid var(--warn);}
+.rand-card-item{transition:.2s;}
+.rand-card-item:hover{filter:brightness(1.3);}
+.home-cat-card{transition:.2s;}
+.home-cat-card:hover{filter:brightness(1.25);transform:translateY(-2px);}
+.quiz-cat-card{transition:.2s;}
+.quiz-cat-card:hover{filter:brightness(1.3);transform:translateY(-2px);}
+.self-judge-ng{transition:.2s;}
+.self-judge-ng:hover{background:rgba(255,77,109,.28)!important;}
+.self-judge-ok{transition:.2s;}
+.self-judge-ok:hover{background:rgba(0,240,160,.28)!important;}
+.rand-card-item:hover{filter:brightness(1.3);}
+.admin-user-card{transition:.2s;}
+.admin-user-card:hover{border-color:var(--accent)!important;background:var(--surface2)!important;}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);font-size:14px;gap:12px;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:768px){
+  .sidebar{display:none;} .main{padding:16px;}
+  .form-2col{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .login-card{padding:32px 20px;}
+  .mode-body{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="grid-bg"></div>
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-mark">⚡</div>
+      <h1>JS TRAINING</h1>
+      <p>プログラミング研修システム</p>
+    </div>
+    <div class="tab-bar">
+      <button class="active" onclick="switchTab('learner')">受講者</button>
+      <button onclick="switchTab('admin')">管理者</button>
+    </div>
+    <div id="pane-learner">
+      <div class="fg"><label>メールアドレス</label><input type="email" id="l-email" placeholder="yamada@example.com"></div>
+      <div class="fg"><label>パスワード</label><input type="password" id="l-pass" onkeydown="if(event.key==='Enter')loginLearner()"></div>
+      <button class="btn-p" id="btn-login" onclick="loginLearner()">ログイン</button>
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">
+        アカウントなし？ <button class="link-btn" onclick="showPane('register')">新規登録</button>
+      </div>
+    </div>
+    <div id="pane-admin" style="display:none">
+      <div class="fg"><label>管理者メール</label><input type="email" id="a-email"></div>
+      <div class="fg"><label>パスワード</label><input type="password" id="a-pass" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+      <button class="btn-p" onclick="loginAdmin()">管理者ログイン</button>
+    </div>
+    <div id="pane-register" style="display:none">
+      <div class="fg"><label>メールアドレス</label><input type="email" id="r-email"></div>
+      <div class="fg"><label>パスワード（6文字以上）</label><input type="password" id="r-pass"></div>
+      <button class="btn-p" id="btn-register" onclick="registerLearner()">登録してログイン</button>
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">
+        <button class="link-btn" onclick="showPane('learner')">← ログインへ戻る</button>
+      </div>
+    </div>
+    <div class="err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" class="screen">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="topbar-logo">⚡ Training</span>
+      <span class="role-badge" id="role-badge">受講者</span>
+    </div>
+    <div class="topbar-r">
+      <span class="uname" id="user-disp"></span>
+      <button class="btn-logout" onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+  <div class="app-body">
+    <div class="sidebar">
+      <div id="nav-learner">
+        <div class="nav-sec">メニュー</div>
+        <div class="nav-item active" onclick="nav('home')"><span class="nav-icon">🏠</span>ホーム</div>
+        <div class="nav-item" onclick="nav('quiz-select')"><span class="nav-icon">📝</span>問題を解く</div>
+        <div class="nav-item" onclick="nav('progress')"><span class="nav-icon">📊</span>成績・進捗</div>
+        <div class="nav-item" onclick="nav('diary')"><span class="nav-icon">📔</span>学習日記</div>
+      </div>
+      <div id="nav-admin" style="display:none">
+        <div class="nav-sec">管理</div>
+        <div class="nav-item active" onclick="nav('admin-home')"><span class="nav-icon">🏠</span>ダッシュボード</div>
+        <div class="nav-item" onclick="nav('admin-users')"><span class="nav-icon">👥</span>受講者管理</div>
+        <div class="nav-item" onclick="nav('admin-diary')"><span class="nav-icon">📔</span>日記・課題</div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="panel active" id="panel-home">
+        <div class="page-title" id="home-title">おかえりなさい！</div>
+        <div class="page-sub">今日も学習を続けましょう。</div>
+        <div class="stats-row" id="home-stats"></div>
+        <div id="home-modes"></div>
+      </div>
+      <div class="panel" id="panel-quiz-select">
+        <div class="page-title">問題を解く</div>
+        <div class="page-sub">モードとカテゴリを選んでください。</div>
+        <div id="quiz-select-body"></div>
+      </div>
+      <div class="panel" id="panel-quiz">
+        <div class="quiz-top">
+          <button class="btn-s" onclick="exitQuiz()">← 戻る</button>
+          <div class="quiz-pbar-wrap">
+            <div class="quiz-pbar-track"><div class="quiz-pbar-fill" id="quiz-pbar"></div></div>
+          </div>
+          <div class="quiz-lbl" id="quiz-counter">1/10</div>
+          <span class="quiz-mode-tag fixed" id="quiz-mode-tag">固定問題</span>
+        </div>
+        <div class="q-card" id="q-card"></div>
+        <div class="explanation" id="explanation"></div>
+        <div class="q-actions" id="q-actions"></div>
+      </div>
+      <div class="panel" id="panel-progress">
+        <div class="page-title">成績・進捗</div>
+        <div class="page-sub">各モードの進捗と受講回数を確認できます。</div>
+        <div id="progress-body"><div class="loading"><div class="spinner"></div>読み込み中...</div></div>
+      </div>
+      <div class="panel" id="panel-diary">
+        <div class="page-title">学習日記</div>
+        <div class="page-sub">毎日の学習を記録しましょう。</div>
+        <div class="diary-form-card">
+          <div class="diary-form-title">✏️ 今日の記録を追加</div>
+          <div class="form-2col">
+            <div class="fg-d"><label>実施日</label><input type="date" id="diary-date"></div>
+            <div class="fg-d"><label>理解度</label>
+              <div class="stars" id="diary-stars">
+                <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
+                <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span>
+                <span class="star" data-v="5">★</span>
+              </div>
+            </div>
+          </div>
+          <div class="fg-d" style="margin-top:14px"><label>課題・難しかった点</label><textarea id="diary-challenge" placeholder="例：クロージャの概念がまだ難しい..."></textarea></div>
+          <div class="fg-d" style="margin-top:12px"><label>その他・メモ</label><textarea id="diary-memo" placeholder="自由にメモ..."></textarea></div>
+          <button class="btn-p" style="width:auto;padding:12px 28px;margin-top:16px" onclick="saveDiary()">記録を保存</button>
+        </div>
+        <div class="diary-entries" id="diary-list"></div>
+      </div>
+      <div class="panel" id="panel-admin-home">
+        <div class="page-title">管理者ダッシュボード</div>
+        <div class="page-sub">受講者の学習状況を確認できます。</div>
+        <div class="stats-row" id="admin-stats"></div>
+        <div id="admin-home-body"></div>
+      </div>
+      <div class="panel" id="panel-admin-users">
+        <div id="admin-list-view">
+          <div class="page-title">受講者管理</div>
+          <div class="page-sub">受講者をクリックして詳細を確認できます。</div>
+          <div class="user-cards" id="user-cards"><div class="loading"><div class="spinner"></div>読み込み中...</div></div>
+        </div>
+        <div id="admin-detail-view" style="display:none">
+          <button class="back-btn" onclick="backToList()">← 受講者一覧へ戻る</button>
+          <div id="admin-detail-body"></div>
+        </div>
+      </div>
+      <div class="panel" id="panel-admin-diary">
+        <div class="page-title">日記・課題一覧</div>
+        <div class="page-sub">全受講者の学習日記を確認できます。</div>
+        <div id="admin-diary-body"><div class="loading"><div class="spinner"></div>読み込み中...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+  onAuthStateChanged, updateProfile }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc,
+  query, where, orderBy, serverTimestamp, updateDoc, increment }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ===== FIREBASE CONFIG =====
+// ⚠️ ご自身のFirebase設定に書き換えてください
+const firebaseConfig = {
+  apiKey: "AIzaSyAjCh1zdTnvwnNzOhYtJbo3CzRe1ZirUak",
+  authDomain: "training-javasacript1.firebaseapp.com",
+  projectId: "training-javasacript1",
+  storageBucket: "training-javasacript1.firebasestorage.app",
+  messagingSenderId: "296317121668",
+  appId: "1:296317121668:web:7cddabe6cb6e81f041bed1"
+};
+//const ADMIN_EMAILS = ["admin@example.com"];
+const ADMIN_EMAILS = ["takeuchi@power-h.co.jp", "pht@power-h.co.jp"];
+
+// ===== カテゴリ定義 =====
+// mode: fixed=固定問題, review=復習問題, challenge=チャレンジ, random=ランダム
+const CATEGORIES = {
+  // ① 固定問題モード
+  js_basic:       { mode:"fixed",     label:"JavaScript基礎編",  icon:"⚡", total:50, color:"var(--accent)" },
+  dom:            { mode:"fixed",     label:"HTML DOM操作編",    icon:"🌐", total:30, color:"var(--accent2)" },
+  // ② 復習問題モード
+  java_review:    { mode:"review",    label:"Java編",            icon:"☕", total:50, color:"var(--orange)" },
+  db_review:      { mode:"review",    label:"DB編",              icon:"🗄️", total:30, color:"var(--gold)" },
+  // ③ チャレンジ問題モード
+  java_challenge: { mode:"challenge", label:"Java Bronze/Silver資格チャレンジ", icon:"🏆", total:20, color:"var(--warn)", pool:"java_challenge_pool" },
+  db_challenge:   { mode:"challenge", label:"DBチャレンジ編",    icon:"💎", total:20, color:"var(--pink)", pool:"db_challenge_pool" },
+  // ④ ランダムモード
+  rand_java_basic:{ mode:"random",    label:"Java基礎編",              icon:"☕", total:20, pool:"java_basic_pool" },
+  rand_java_mid:  { mode:"random",    label:"Java Bronze/Silver資格",  icon:"🏆", total:20, pool:"java_mid_pool" },
+  rand_db_basic:  { mode:"random",    label:"DB初級",            icon:"🗄️", total:20, pool:"db_basic_pool" },
+  rand_db_mid:    { mode:"random",    label:"DB中級",            icon:"🗄️", total:20, pool:"db_mid_pool" },
+  rand_js_basic:  { mode:"random",    label:"JavaScript初級",   icon:"⚡", total:20, pool:"js_basic_pool" },
+  rand_js_mid:    { mode:"random",    label:"JavaScript中級",   icon:"⚡", total:20, pool:"js_mid_pool" },
+  rand_dom:       { mode:"random",    label:"HTML DOM操作編",    icon:"🌐", total:20, pool:"dom_pool" },
+};
+
+// 固定・復習・チャレンジカテゴリ（進捗管理あり）
+const MANAGED_CATS = Object.keys(CATEGORIES).filter(k=>CATEGORIES[k].mode!=='random');
+
+// 空のFirestore進捗構造を返す
+function emptyProgress() {
+  const fp={}, stats={};
+  MANAGED_CATS.forEach(cat=>{
+    fp[cat] = {};      // { questionId: { correct, lap } }
+    stats[cat] = {};   // { '1': { answered, correct, date } }  key=受講回数
+  });
+  return { fixedProgress:fp, stats };
+}
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let QUESTIONS = [];
+let currentUser = null;
+let currentRole = null;
+let diaryRating = 0;
+let qs = { mode:null, category:null, lap:1, questions:[], current:0, answers:[], submitted:false };
+let tfSel = null;
+
+// ===== 問題読み込み =====
+async function loadQuestions() {
+  try {
+    const res = await fetch('./questions_data.js');
+    const buffer = await res.arrayBuffer();
+    const text = new TextDecoder('utf-8').decode(buffer);
+    const match = text.match(/window\.__QD\s*=\s*({[\s\S]+?});/);
+    if (match) {
+      const qd = JSON.parse(match[1]);
+      QUESTIONS = decryptQuestions(qd.data, qd.key);
+    }
+  } catch(e) { console.warn('問題データ読み込み失敗:', e); QUESTIONS = []; }
+}
+function decryptQuestions(encrypted, keyReversed) {
+  const key = keyReversed.split('').reverse().join('');
+  const keyBytes = new TextEncoder().encode(key);
+  const bytes = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
+  const xored = bytes.map((b, i) => b ^ keyBytes[i % keyBytes.length]);
+
+  // ① チャンク分割（スタックオーバーフロー対策）
+  const chunkSize = 8192;
+  let base64str = '';
+  for (let i = 0; i < xored.length; i += chunkSize) {
+    base64str += String.fromCharCode(...xored.subarray(i, i + chunkSize));
+  }
+
+  // ② TextDecoderでUTF-8として正しくデコード（文字化け対策）
+  const innerBytes = Uint8Array.from(atob(base64str), c => c.charCodeAt(0));
+  const jsonStr = new TextDecoder('utf-8').decode(innerBytes);
+  return JSON.parse(jsonStr);
+}
+
+// ===== AUTH =====
+onAuthStateChanged(auth, async user=>{
+  if (user) {
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (snap.exists()) {
+      currentUser = { uid:user.uid, ...snap.data() };
+      currentRole = ADMIN_EMAILS.includes(user.email)?'admin':'learner';
+      currentUser.role = currentRole;
+      await loadQuestions();
+      initApp();
+    } else {
+      // usersドキュメントが存在しない場合は最大5回リトライ（3秒×5回=15秒）
+      let retrySnap = null;
+      for(let i=0; i<5; i++){
+        await new Promise(r => setTimeout(r, 3000));
+        retrySnap = await getDoc(doc(db,'users',user.uid));
+        if(retrySnap.exists()) break;
+      }
+      if(retrySnap && retrySnap.exists()){
+        currentUser = { uid:user.uid, ...retrySnap.data() };
+        currentRole = ADMIN_EMAILS.includes(user.email)?'admin':'learner';
+        currentUser.role = currentRole;
+        await loadQuestions();
+        initApp();
+      } else {
+        await signOut(auth);
+        currentUser=null;
+        showScreen('login');
+        setErr('登録処理に時間がかかっています。しばらく待ってから再度ログインしてください。');
+      }
+    }
+  } else { currentUser=null; showScreen('login'); }
+});
+
+// ===== ボタンローディング =====
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  if(loading) {
+    btn.disabled = true;
+    btn.dataset.original = btn.textContent;
+    btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;">'
+      + '<span style="width:16px;height:16px;border:2px solid rgba(0,0,0,.3);'
+      + 'border-top-color:#000;border-radius:50%;display:inline-block;'
+      + 'animation:spin 1s linear infinite;"></span>処理中...</span>';
+  } else {
+    btn.disabled = false;
+    btn.textContent = btn.dataset.original || btn.textContent;
+  }
+}
+
+window.switchTab = t=>{
+  document.querySelectorAll('.tab-bar button').forEach((b,i)=>b.classList.toggle('active',(t==='learner'&&i===0)||(t==='admin'&&i===1)));
+  showPane(t);
+};
+window.showPane = p=>{
+  ['learner','admin','register'].forEach(x=>{ document.getElementById('pane-'+x).style.display=x===p?'block':'none'; });
+  clearErr();
+};
+window.loginLearner = async()=>{
+  const email=document.getElementById('l-email').value.trim(), pass=document.getElementById('l-pass').value;
+  if(!email||!pass) return setErr('入力してください');
+  if(ADMIN_EMAILS.includes(email)) return setErr('管理者タブからログインしてください');
+  setLoading('btn-login', true);
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    setErr(authErr(e.code));
+    setLoading('btn-login', false);
+  }
+};
+window.loginAdmin = async()=>{
+  const email=document.getElementById('a-email').value.trim(), pass=document.getElementById('a-pass').value;
+  if(!ADMIN_EMAILS.includes(email)) return setErr('管理者権限がありません');
+  try{ await signInWithEmailAndPassword(auth,email,pass); }catch(e){ setErr(authErr(e.code)); }
+};
+window.registerLearner = async()=>{
+  const email=document.getElementById('r-email').value.trim(),
+        pass=document.getElementById('r-pass').value;
+  if(!email||!pass) return setErr('すべて入力してください');
+  if(pass.length<6) return setErr('パスワードは6文字以上');
+  if(ADMIN_EMAILS.includes(email)) return setErr('このメールは使用できません');
+  setLoading('btn-register', true);
+  try{
+    // ① allowed_usersにメールアドレスが存在するか確認
+    let allowSnap;
+    try {
+      allowSnap = await getDoc(doc(db,'allowed_users',email));
+    } catch(readErr) {
+      console.error('allowed_users読み取りエラー:', readErr.code, readErr.message);
+      setLoading('btn-register', false);
+      return setErr('登録確認中にエラーが発生しました（' + readErr.code + '）');
+    }
+    const allowData = allowSnap.data();
+    if(!allowSnap.exists()){
+      setLoading('btn-register', false);
+      return setErr('このメールアドレスは登録できません。管理者にお問い合わせください。');
+    }
+    if(allowData.registered===true){
+      setLoading('btn-register', false);
+      return setErr('このメールアドレスはすでに登録済みです。');
+    }
+
+    // ② allowed_usersから名前を取得
+    const name = allowSnap.data().name || '';
+
+    // ③ Firebase Authにアカウント作成
+    const cred = await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+    const ep = emptyProgress();
+    try {
+      await setDoc(doc(db,'users',cred.user.uid),{
+        name, email, role:'learner', createdAt:serverTimestamp(),
+        fixedProgress: ep.fixedProgress,
+        stats: ep.stats
+      });
+    } catch(setErr2) {
+      console.error('setDocエラー詳細:', setErr2.code, setErr2.message, setErr2);
+      throw setErr2;
+    }
+
+    // ④ allowed_usersのregisteredをtrueに更新（失敗してもログインは継続）
+    try {
+      await updateDoc(doc(db,'allowed_users',email),{ registered:true });
+    } catch(e2) {
+      console.warn('allowed_users更新失敗:', e2);
+    }
+
+    // 登録完了 → onAuthStateChangedが自動発火してinitApp()へ
+  }catch(e){
+    const code = e.code || '';
+    if(code.includes('permission-denied')){
+      setErr('アクセス権限がありません。管理者にお問い合わせください');
+    } else {
+      setErr(authErr(code));
+    }
+    setLoading('btn-register', false);
+  }
+};
+window.logout = async()=>{ await signOut(auth); toast('ログアウトしました','success'); };
+
+// ===== APP INIT =====
+function initApp() {
+  showScreen('app');
+  const isAdmin = currentRole==='admin';
+  document.getElementById('user-disp').textContent = currentUser.name;
+  const rb = document.getElementById('role-badge');
+  rb.textContent = isAdmin?'管理者':'受講者';
+  rb.classList.toggle('admin',isAdmin);
+  document.getElementById('nav-learner').style.display = isAdmin?'none':'block';
+  document.getElementById('nav-admin').style.display = isAdmin?'block':'none';
+  if(isAdmin){ nav('admin-home'); }
+  else{ nav('home'); }
+  initStars();
+  document.getElementById('diary-date').value = today();
+}
+
+// ===== NAV =====
+window.nav = page=>{
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+page).classList.add('active');
+  const map={home:0,'quiz-select':1,quiz:1,progress:2,diary:3,'admin-home':0,'admin-users':1,'admin-diary':2};
+  const items=document.querySelectorAll('.nav-item');
+  if(map[page]!==undefined) items[map[page]]?.classList.add('active');
+  if(page==='home') renderHome();
+  if(page==='quiz-select') renderQuizSelect();
+  if(page==='progress') renderProgress();
+  if(page==='diary') renderDiary();
+  if(page==='admin-home') renderAdminHome();
+  if(page==='admin-users'){
+    document.getElementById('admin-list-view').style.display='block';
+    document.getElementById('admin-detail-view').style.display='none';
+    renderAdminUsers();
+  }
+  if(page==='admin-diary') renderAdminDiary();
+};
+
+// ===== HOME =====
+function renderHome() {
+  document.getElementById('home-title').textContent = `おかえりなさい、${currentUser.name}さん！`;
+  const fp = currentUser.fixedProgress||{};
+  const stats = currentUser.stats||{};
+  let totalDone=0, totalQ=0, totalCor=0, totalAns=0;
+  MANAGED_CATS.forEach(cat=>{
+    totalQ += CATEGORIES[cat].total||0;
+    totalDone += Object.keys(fp[cat]||{}).length;
+    Object.values(stats[cat]||{}).forEach(ls=>{ totalAns+=ls.answered||0; totalCor+=ls.correct||0; });
+  });
+  const rate = totalAns>0?Math.round(totalCor/totalAns*100):0;
+  const overallPct = totalQ>0?Math.round(totalDone/totalQ*100):0;
+
+  document.getElementById('home-stats').innerHTML=`
+    <div class="stat-card" style="border-top:3px solid var(--accent)">
+      <div class="stat-num">${totalDone}<span style="font-size:16px;color:var(--muted)">/${totalQ}</span></div>
+      <div class="stat-label">完了問題数</div>
+      <div style="margin-top:10px">
+        <div class="prog-bar" style="height:5px"><div class="prog-fill accent" style="width:${overallPct}%;background:var(--accent)"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right">${overallPct}%</div>
+      </div>
+    </div>
+    <div class="stat-card" style="border-top:3px solid var(--accent2)">
+      <div class="stat-num" style="color:var(--accent2)">${rate}%</div>
+      <div class="stat-label">正答率（自動採点）</div>
+      <div style="margin-top:10px;font-size:13px;color:var(--muted)">${totalCor} / ${totalAns} 問正解</div>
+    </div>
+    <div class="stat-card" style="border-top:3px solid var(--gold)">
+      <div class="stat-num" style="color:var(--gold)">${totalAns}</div>
+      <div class="stat-label">総回答数</div>
+    </div>
+  `;
+
+  const modes=[
+    {key:'fixed',    label:'① 固定問題モード',   icon:'📌',
+     color:'var(--c-fixed)',     bg:'rgba(0,200,240,.06)',    border:'rgba(0,200,240,.22)',
+     cats:['js_basic','dom']},
+    {key:'review',   label:'② 復習問題モード',   icon:'🔁',
+     color:'var(--c-review)',    bg:'rgba(255,170,0,.06)',    border:'rgba(255,170,0,.22)',
+     cats:['java_review','db_review']},
+    {key:'challenge',label:'③ チャレンジモード', icon:'🔥',
+     color:'var(--c-challenge)', bg:'rgba(255,77,109,.06)',   border:'rgba(255,77,109,.22)',
+     cats:['java_challenge','db_challenge']},
+  ];
+
+  document.getElementById('home-modes').innerHTML = modes.map(m=>`
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="font-size:18px">${m.icon}</span>
+        <span style="font-size:16px;font-weight:700;color:var(--text)">${m.label}</span>
+        <div style="flex:1;height:1px;background:var(--border);margin-left:8px"></div>
+        <button onclick="nav(&apos;quiz-select&apos;)" style="padding:5px 14px;
+          background:transparent;border:1px solid var(--border);border-radius:6px;
+          color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--sans);">
+          問題を解く →
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+        ${m.cats.map(cat=>homeCatCard(cat,fp,stats,m.color,m.bg,m.border)).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function homeCatCard(cat, fp, stats, modeColor, modeBg, modeBorder) {
+  const catDef = CATEGORIES[cat];
+  const catFp = fp[cat]||{};
+  const catStats = stats[cat]||{};
+  const lapNums = Object.keys(catStats).map(Number).sort((a,b)=>a-b);
+  const currentLap = lapNums.length>0?Math.max(...lapNums):1;
+  const lapSt = catStats[String(currentLap)]||{answered:0,correct:0};
+  const rate = (lapSt.answered||0)>0?Math.round((lapSt.correct||0)/(lapSt.answered||0)*100):0;
+  const total = catDef.total;
+  // 全モード「現在回」の回答数で進捗表示
+  const done = Object.keys(catFp).filter(id=>catFp[id]&&catFp[id].lap===currentLap).length;
+  const pct = Math.round(done/total*100);
+  const remaining = total - done;
+
+  // 状態に応じたラベル
+  const statusLabel = done===0 ? "未開始" : done===total ? "✅ 完了" : "進行中";
+  const statusColor = done===0 ? "var(--muted)" : done===total ? "var(--accent2)" : "var(--gold)";
+
+  return `
+  <div onclick="startQuizByCategory(&apos;${cat}&apos;)" class="home-cat-card" style="
+    background:${modeBg};
+    border:1px solid ${modeBorder};
+    border-radius:12px;padding:20px;cursor:pointer;
+    border-left:4px solid ${modeColor};
+  ">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:3px;color:var(--text)">${catDef.icon} ${catDef.label}</div>
+        <div style="font-size:12px;color:var(--muted)">全${total}問 / 第${currentLap}回</div>
+      </div>
+      <span style="font-size:11px;color:${statusColor};font-weight:700;
+        background:rgba(0,0,0,.25);padding:3px 10px;border-radius:20px">${statusLabel}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div style="text-align:center;background:rgba(0,0,0,.25);border-radius:8px;padding:10px 4px">
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:${modeColor}">${done}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">完了</div>
+      </div>
+      <div style="text-align:center;background:rgba(0,0,0,.25);border-radius:8px;padding:10px 4px">
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--muted)">${remaining}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">残り</div>
+      </div>
+      <div style="text-align:center;background:rgba(0,0,0,.25);border-radius:8px;padding:10px 4px">
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent2)">${rate}%</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">正答率</div>
+      </div>
+    </div>
+    <div style="height:6px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${modeColor};border-radius:3px;transition:width .6s;
+        box-shadow:0 0 8px ${modeColor}"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px">
+      <span style="font-size:11px;color:var(--muted)">進捗</span>
+      <span style="font-size:12px;font-family:var(--mono);font-weight:700;color:${modeColor}">${pct}%</span>
+    </div>
+  </div>`;
+}
+
+// ===== QUIZ SELECT =====
+function renderQuizSelect() {
+  const fp = currentUser.fixedProgress||{};
+  const stats = currentUser.stats||{};
+
+  const managedModes=[
+    {key:'fixed',    label:'① 固定問題モード',   icon:'📌',
+     color:'var(--c-fixed)',     bg:'rgba(0,200,240,.06)',  border:'rgba(0,200,240,.22)',
+     catBg:'rgba(0,200,240,.04)',
+     desc:'全問を順番通りに出題。1問ごとに自動保存。', cats:['js_basic','dom']},
+    {key:'review',   label:'② 復習問題モード',   icon:'🔁',
+     color:'var(--c-review)',    bg:'rgba(255,170,0,.06)',  border:'rgba(255,170,0,.22)',
+     catBg:'rgba(255,170,0,.04)',
+     desc:'Java・DBの基礎〜中級を固定出題。', cats:['java_review','db_review']},
+    {key:'challenge',label:'③ チャレンジモード', icon:'🔥',
+     color:'var(--c-challenge)', bg:'rgba(255,77,109,.06)', border:'rgba(255,77,109,.22)',
+     catBg:'rgba(255,77,109,.04)',
+     desc:'プール100問からランダム20問出題。受講回数ごとに成績を記録。', cats:['java_challenge','db_challenge']},
+  ];
+  const randomCats=[
+    {key:'rand_java_basic', label:'Java基礎編',                    icon:'☕'},
+    {key:'rand_java_mid',   label:'Java Bronze/Silver資格',        icon:'🏆'},
+    {key:'rand_db_basic',   label:'DB 初級',                       icon:'🗄️'},
+    {key:'rand_db_mid',     label:'DB 中級',                       icon:'🗄️'},
+    {key:'rand_js_basic',   label:'JavaScript 初級',              icon:'⚡'},
+    {key:'rand_js_mid',     label:'JavaScript 中級',              icon:'⚡'},
+    {key:'rand_dom',        label:'HTML DOM操作',                  icon:'🌐'},
+  ];
+
+  document.getElementById('quiz-select-body').innerHTML = `
+    ${managedModes.map(m=>`
+      <div style="margin-bottom:32px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:18px">${m.icon}</span>
+          <span style="font-size:16px;font-weight:700;color:var(--text)">${m.label}</span>
+          <div style="flex:1;height:1px;background:var(--border);margin-left:4px"></div>
+          <span style="font-size:12px;color:var(--muted)">${m.desc}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">
+          ${m.cats.map((cat,ci)=>{
+            const catDef=CATEGORIES[cat];
+            const catFp=fp[cat]||{};
+            const catStats=stats[cat]||{};
+            const lapNums=Object.keys(catStats).map(Number).sort((a,b)=>a-b);
+            const currentLap=lapNums.length>0?Math.max(...lapNums):1;
+            const lapSt=catStats[String(currentLap)]||{answered:0,correct:0};
+            const lapAnswered=lapSt.answered||0;
+            const lapCorrect=lapSt.correct||0;
+            const rate=lapAnswered>0?Math.round(lapCorrect/lapAnswered*100):0;
+            const total=catDef.total;
+            // 全モード「現在回」の回答数で進捗表示
+            const done = Object.keys(catFp).filter(id=>catFp[id]&&catFp[id].lap===currentLap).length;
+            const pct=Math.round(done/total*100);
+
+            return `
+            <div onclick="startQuizByCategory(&apos;${cat}&apos;)" class="quiz-cat-card" style="
+              background:${m.catBg};
+              border:2px solid ${m.border};
+              border-left:5px solid ${m.color};
+              border-radius:12px;
+              padding:18px 20px;cursor:pointer;
+              display:flex;align-items:center;gap:16px;
+              box-shadow:0 2px 12px rgba(0,0,0,.3);
+            ">
+              <div style="
+                width:52px;height:52px;border-radius:12px;flex-shrink:0;
+                background:${m.bg};border:1px solid ${m.border};
+                display:flex;align-items:center;justify-content:center;font-size:26px;
+              ">${catDef.icon}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <span style="font-size:15px;font-weight:700;color:var(--text)">${catDef.label}</span>
+                  <span style="font-size:11px;padding:2px 8px;border-radius:10px;
+                    background:rgba(255,170,0,.15);color:var(--gold);font-weight:600;border:1px solid rgba(255,170,0,.3)">第${currentLap}回</span>
+                  ${done===total?'<span style="font-size:11px;color:var(--accent2);font-weight:700">✅ 完了</span>':''}
+                </div>
+                <div style="height:6px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden;margin-bottom:6px">
+                  <div style="height:100%;width:${pct}%;background:${m.color};border-radius:3px;transition:width .5s;
+                    box-shadow:0 0 6px ${m.color}"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+                  <span>${done}/${total}問完了 (${pct}%)</span>
+                  <span>正答率 <b style="color:var(--accent2);font-family:var(--mono)">${rate}%</b></span>
+                </div>
+              </div>
+              <div style="color:${m.color};font-size:22px;flex-shrink:0;font-weight:700">›</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('')}
+
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:18px">🎲</span>
+        <span style="font-size:16px;font-weight:700;color:var(--text)">④ ランダムモード</span>
+        <div style="flex:1;height:1px;background:var(--border);margin-left:4px"></div>
+        <span style="font-size:12px;color:var(--muted)">各カテゴリからランダムに20問出題。成績管理なし。</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+        ${randomCats.map((rc,ri)=>`
+          <div onclick="startRandom('${rc.key}')" class="rand-card-item" style="
+            background:var(--c-random-bg);
+            border:2px solid var(--c-random-border);
+            border-left:5px solid var(--c-random);
+            border-radius:12px;
+            padding:14px 18px;cursor:pointer;
+            display:flex;align-items:center;gap:12px;
+            box-shadow:0 2px 12px rgba(0,0,0,.3);
+          ">
+            <div style="
+              width:40px;height:40px;border-radius:10px;flex-shrink:0;
+              background:rgba(192,132,252,.15);border:1px solid var(--c-random-border);
+              display:flex;align-items:center;justify-content:center;font-size:20px;
+            ">${rc.icon}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${rc.label}</div>
+              <div style="font-size:11px;color:var(--c-random);margin-top:3px">20問 / ランダム出題</div>
+            </div>
+            <div style="color:var(--c-random);font-size:20px;font-weight:700">›</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ===== START QUIZ =====
+window.startQuizByCategory = async function(cat) {
+  const catDef = CATEGORIES[cat];
+
+  // チャレンジモード：プールからランダム出題・受講回数管理あり・前回重複なし優先
+  if(catDef.mode === 'challenge' && catDef.pool) {
+    const pool = QUESTIONS.filter(q=>q.pool===catDef.pool);
+    if(pool.length===0){
+      toast('問題データがまだありません。questions_data.jsを更新してください。','error');
+      return;
+    }
+    const fp   = currentUser.fixedProgress?.[cat]||{};
+    const stats = currentUser.stats?.[cat]||{};
+    const lapNums = Object.keys(stats).map(Number);
+    let currentLap = lapNums.length>0 ? Math.max(...lapNums) : 1;
+
+    // 現在の回で出題済みのIDを取得
+    const answeredIds = Object.keys(fp)
+      .filter(id => fp[id] && fp[id].lap === currentLap)
+      .map(Number);
+
+    if(answeredIds.length >= catDef.total) {
+      // この回の20問が完了
+      const next = currentLap + 1;
+      if(!confirm(`第${currentLap}回が完了しています！\n第${next}回（別の20問）を開始しますか？`)) return;
+      currentLap = next;
+      // 新回にリセット：前回までに出題したIDを除外
+      const allAnsweredIds = Object.keys(fp).map(Number);
+      const fresh = pool.filter(q => !allAnsweredIds.includes(q.id));
+      // 未出題が20問未満ならプール全体からランダム
+      const source = fresh.length >= catDef.total ? fresh : pool;
+      const selected = [...source].sort(()=>Math.random()-.5).slice(0, catDef.total);
+      startManagedQuiz(cat, selected, currentLap);
+      return;
+    }
+
+    // 今の回の残り問題（未出題）を取得
+    const notAnswered = pool.filter(q => !answeredIds.includes(q.id));
+    // 不足分はプール全体から補う
+    const needed = catDef.total - answeredIds.length;
+    const selected = [...notAnswered].sort(()=>Math.random()-.5).slice(0, needed);
+    startManagedQuiz(cat, selected, currentLap);
+    return;
+  }
+
+  // 固定・復習モード（受講回数管理あり）
+  const fp = currentUser.fixedProgress?.[cat]||{};
+  const stats = currentUser.stats?.[cat]||{};
+  const catQs = QUESTIONS.filter(q=>q.category===cat).sort((a,b)=>a.id-b.id);
+
+  if(catQs.length===0){
+    toast('問題データがまだありません。questions_data.jsを更新してください。','error');
+    return;
+  }
+
+  // 現在の受講回数を計算
+  const lapNums = Object.keys(stats).map(Number);
+  let currentLap = lapNums.length>0?Math.max(...lapNums):1;
+
+  // 未回答の問題を取得（現在回のみ）
+  const answered = Object.keys(fp).filter(id=>fp[id]&&fp[id].lap===currentLap).map(Number);
+  const remaining = catQs.filter(q=>!answered.includes(q.id));
+
+  if(remaining.length===0){
+    const next = currentLap+1;
+    if(!confirm(`第${currentLap}回が完了しています！\n第${next}回（復習）を開始しますか？`)) return;
+    currentLap = next;
+    startManagedQuiz(cat, catQs, currentLap);
+    return;
+  }
+  startManagedQuiz(cat, remaining, currentLap);
+};
+
+function startManagedQuiz(cat, questions, lap) {
+  const catDef = CATEGORIES[cat];
+  qs = { mode:catDef.mode, category:cat, lap, questions, current:0, answers:[], submitted:false };
+  const tagClass = catDef.mode;
+  const tagLabels = {fixed:'固定問題',review:'復習問題',challenge:'チャレンジ'};
+  document.getElementById('quiz-mode-tag').textContent = tagLabels[catDef.mode]||catDef.mode;
+  document.getElementById('quiz-mode-tag').className = 'quiz-mode-tag '+tagClass;
+  nav('quiz');
+  renderQuestion();
+}
+
+window.startRandom = function(cat) {
+  const catDef = CATEGORIES[cat];
+  // プールからランダムに問題を取得（poolキーで絞る、なければcategoryで代用）
+  const pool = QUESTIONS.filter(q=>q.pool===catDef.pool||q.randomPool===catDef.pool);
+  if(pool.length===0){
+    toast('このカテゴリの問題データがまだありません。','error');
+    return;
+  }
+  const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0,catDef.total);
+  qs = { mode:'random', category:cat, lap:0, questions:shuffled, current:0, answers:[], submitted:false };
+  document.getElementById('quiz-mode-tag').textContent='ランダム';
+  document.getElementById('quiz-mode-tag').className='quiz-mode-tag random';
+  nav('quiz');
+  renderQuestion();
+};
+
+window.exitQuiz = function() {
+  if(confirm('クイズを中断しますか？\n管理対象モードは回答済みの問題が保存されています。')){
+    nav('quiz-select');
+  }
+};
+
+// ===== RENDER QUESTION =====
+function renderQuestion() {
+  const q = qs.questions[qs.current];
+  const total = qs.questions.length;
+  const pct = (qs.current/total*100).toFixed(0);
+  document.getElementById('quiz-pbar').style.width = pct+'%';
+  document.getElementById('quiz-counter').textContent = `${qs.current+1}/${total}`;
+  document.getElementById('explanation').style.display='none';
+  document.getElementById('explanation').className='explanation';
+  tfSel=null; qs.submitted=false;
+
+  // category（固定/復習）またはpool（チャレンジ/ランダム）からカテゴリ定義を取得
+  const catDef = CATEGORIES[q.category]
+    || Object.values(CATEGORIES).find(d=>d.pool===q.pool)
+    || {label:q.category||q.pool||'問題', icon:''};
+  const tLabel = {truefalse:'○×問題',fillblank:'穴埋め',essay:'記述'}[q.type];
+
+  let inputHTML='';
+  if(q.type==='truefalse'){
+    inputHTML=`<div class="tf-grid">
+      <button class="tf-btn" id="btn-t" onclick="selTF(true)">○<div class="tfl">正しい</div></button>
+      <button class="tf-btn" id="btn-f" onclick="selTF(false)">✕<div class="tfl">誤り</div></button>
+    </div>`;
+  }else if(q.type==='fillblank'){
+    inputHTML=`<input class="fill-input" id="fill-ans" placeholder="答えを入力してください" onkeydown="if(event.key==='Enter')submitAns()">`;
+  }else{
+    inputHTML=`<textarea class="essay-input" id="essay-ans" placeholder="コードや説明を記述してください..."></textarea>`;
+  }
+
+  document.getElementById('q-card').innerHTML=`
+    <div class="q-meta">
+      <span class="badge badge-${q.category||q.pool||''}">${catDef.icon||''} ${catDef.label}</span>
+      <span class="badge badge-${q.type}">${tLabel}</span>
+      ${(qs.mode==='fixed'||qs.mode==='review')?`<span class="lap-badge">第${qs.lap}回</span>`:''}
+      <span class="q-num">${qs.current+1}/${total}</span>
+    </div>
+    <div class="q-text" id="q-text-area"></div>
+    ${inputHTML}
+  `;
+  // ③ textContentで設定（<script>等のHTMLタグが含まれても安全）
+  document.getElementById('q-text-area').textContent = q.question;
+
+  const acts=document.getElementById('q-actions');
+  if(q.type==='truefalse'){
+    acts.innerHTML=`<button class="btn-skip" onclick="skipQ()">スキップ</button>`;
+  }else{
+    acts.innerHTML=`<button class="btn-skip" onclick="skipQ()">スキップ</button><button class="btn-submit" onclick="submitAns()">回答する</button>`;
+  }
+}
+
+window.selTF = val=>{
+  tfSel=val;
+  document.getElementById('btn-t').className='tf-btn'+(val===true?' sel-t':'');
+  document.getElementById('btn-f').className='tf-btn'+(val===false?' sel-f':'');
+  document.getElementById('q-actions').innerHTML=`<button class="btn-skip" onclick="skipQ()">スキップ</button><button class="btn-submit" onclick="submitAns()">回答する</button>`;
+};
+
+window.submitAns = async function() {
+  if(qs.submitted) return;
+  const q=qs.questions[qs.current];
+  let userAns;
+  if(q.type==='truefalse'){ if(tfSel===null){toast('○か✕を選択してください','error');return;} userAns=tfSel; }
+  else if(q.type==='fillblank'){ userAns=document.getElementById('fill-ans').value.trim(); if(!userAns){toast('答えを入力してください','error');return;} }
+  else{ userAns=document.getElementById('essay-ans').value.trim(); if(!userAns){toast('回答を入力してください','error');return;} }
+  qs.submitted=true; tfSel=null;
+
+  let isCorrect=null;
+  if(q.type==='truefalse'){ isCorrect=(userAns===q.answer); }
+  else if(q.type==='fillblank'){
+    const ua=String(userAns).toLowerCase().replace(/[　\s]/g,'');
+    const ans=String(q.answer).toLowerCase().replace(/[　\s]/g,'');
+    isCorrect=ua===ans||ua.includes(ans)||ans.includes(ua);
+  }
+  qs.answers.push({id:q.id,answer:userAns,correct:isCorrect});
+  showExp(q,userAns,isCorrect);
+
+  if(q.type==='truefalse'){
+    const tBtn=document.getElementById('btn-t'),fBtn=document.getElementById('btn-f');
+    (q.answer?tBtn:fBtn).classList.add('correct');
+    if(userAns!==q.answer)(userAns?tBtn:fBtn).classList.add('wrong');
+  }
+
+  // 記述問題（自己採点）の場合は「正解だった/不正解だった」ボタンを表示
+  if(q.type==='essay'){
+    const isLast=qs.current>=qs.questions.length-1;
+    document.getElementById('q-actions').innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+        <div style="font-size:13px;color:var(--muted);text-align:center">
+          模範解答と照らし合わせて、自己採点してください
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="selfJudge(false,${isLast})" style="
+            padding:12px 28px;background:rgba(255,77,109,.15);
+            border:2px solid var(--c-challenge);border-radius:var(--radius);
+            color:var(--c-challenge);font-size:15px;font-weight:700;
+            cursor:pointer;font-family:var(--sans);
+          " class="self-judge-ng">
+            ❌ 不正解だった
+          </button>
+          <button onclick="selfJudge(true,${isLast})" style="
+            padding:12px 28px;background:rgba(0,240,160,.15);
+            border:2px solid var(--accent2);border-radius:var(--radius);
+            color:var(--accent2);font-size:15px;font-weight:700;
+            cursor:pointer;font-family:var(--sans);
+          " class="self-judge-ok">
+            ✅ 正解だった
+          </button>
+        </div>
+      </div>
+    `;
+    // 記述問題は自己採点ボタン押下まで保存しない
+    return;
+  }
+
+  // ランダム以外は1問ごとに保存（記述以外）
+  if(qs.mode!=='random') await saveOneAnswer(q,isCorrect);
+
+  const isLast=qs.current>=qs.questions.length-1;
+  document.getElementById('q-actions').innerHTML=isLast
+    ?`<button class="btn-next" onclick="finishQuiz()">結果を見る 🎉</button>`
+    :`<button class="btn-next" onclick="nextQ()">次の問題 →</button>`;
+};
+
+// 自己採点ボタン押下時の処理
+window.selfJudge = async function(judged, isLast) {
+  // 最後のanswerのcorrectを自己採点結果で更新
+  const lastAns = qs.answers[qs.answers.length-1];
+  lastAns.correct = judged;
+
+  // ランダム以外は保存
+  const q = qs.questions[qs.current];
+  if(qs.mode!=='random') await saveOneAnswer(q, judged);
+
+  // 解説の色を自己採点結果に合わせて更新
+  const expEl = document.getElementById('explanation');
+  if(judged){
+    expEl.className='explanation correct';
+    expEl.querySelector('.exp-status').textContent='✅ 正解！（自己採点）';
+  } else {
+    expEl.className='explanation wrong';
+    expEl.querySelector('.exp-status').textContent='❌ 不正解（自己採点）';
+  }
+
+  document.getElementById('q-actions').innerHTML=isLast
+    ?`<button class="btn-next" onclick="finishQuiz()">結果を見る 🎉</button>`
+    :`<button class="btn-next" onclick="nextQ()">次の問題 →</button>`;
+};
+
+// 1問ごとの保存（受講回数ごと）
+async function saveOneAnswer(q, isCorrect) {
+  try {
+    const uid=currentUser.uid;
+    // チャレンジ/ランダムプール問題はq.categoryがないためqs.categoryを使う
+    const cat = q.category || qs.category;
+    const qid=String(q.id);
+    const lap=String(qs.lap);
+
+    // fixedProgress: { cat: { qid: { correct, lap, answeredAt } } }
+    const fpUpdate={};
+    fpUpdate[`fixedProgress.${cat}.${qid}`]={ correct:isCorrect, lap:qs.lap, answeredAt:new Date().toISOString() };
+
+    // stats: { cat: { '1': { answered, correct }, '2': {...} } }
+    const stUpdate={};
+    stUpdate[`stats.${cat}.${lap}.answered`]=increment(1);
+    if(isCorrect===true) stUpdate[`stats.${cat}.${lap}.correct`]=increment(1);
+
+    await updateDoc(doc(db,'users',uid),{...fpUpdate,...stUpdate});
+
+    // ローカル更新
+    if(!currentUser.fixedProgress) currentUser.fixedProgress={};
+    if(!currentUser.fixedProgress[cat]) currentUser.fixedProgress[cat]={};
+    currentUser.fixedProgress[cat][qid]={ correct:isCorrect, lap:qs.lap };
+    if(!currentUser.stats) currentUser.stats={};
+    if(!currentUser.stats[cat]) currentUser.stats[cat]={};
+    if(!currentUser.stats[cat][lap]) currentUser.stats[cat][lap]={answered:0,correct:0};
+    currentUser.stats[cat][lap].answered=(currentUser.stats[cat][lap].answered||0)+1;
+    if(isCorrect===true) currentUser.stats[cat][lap].correct=(currentUser.stats[cat][lap].correct||0)+1;
+  }catch(e){ console.warn('保存エラー:',e); }
+}
+
+window.nextQ=function(){ qs.current++; renderQuestion(); window.scrollTo(0,0); };
+window.skipQ=function(){
+  const q=qs.questions[qs.current];
+  qs.answers.push({id:q.id,answer:null,correct:null});
+  if(qs.current>=qs.questions.length-1) finishQuiz();
+  else{qs.current++;renderQuestion();}
+};
+
+function showExp(q,userAns,isCorrect){
+  const el=document.getElementById('explanation');
+  let status,cls;
+  if(isCorrect===null){status='📋 自己採点 — 模範解答と照らし合わせてください';cls='essay';}
+  else if(isCorrect){status='✅ 正解！';cls='correct';}
+  else{status='❌ 不正解';cls='wrong';}
+  el.className='explanation '+cls;
+  el.innerHTML=`<div class="exp-status">${status}</div>
+    <div class="exp-answer">模範解答: ${q.type==='truefalse'?(q.answer?'○（正しい）':'✕（誤り）'):q.answer}</div>
+    <div class="exp-text">${q.explanation}</div>`;
+  el.style.display='block';
+}
+
+// ===== FINISH =====
+window.finishQuiz = async function(){
+  const answers=qs.answers;
+  const correct=answers.filter(a=>a.correct===true).length;
+  const wrong=answers.filter(a=>a.correct===false).length;
+  const essay=answers.filter(a=>a.correct===null&&a.answer!==null).length; // 未採点（通常0）
+  const skipped=answers.filter(a=>a.answer===null).length;
+  const total=answers.length;
+  const answered=total-skipped;
+  // 自己採点ボタン押下後はessayは通常0になるため正確な正答率を計算
+  const pct=answered>0?Math.round(correct/answered*100):0;
+
+  const catDef=CATEGORIES[qs.category]||{label:qs.category};
+  const lapText=qs.mode!=='random'?` 第${qs.lap}回`:'';
+
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-progress').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[2]?.classList.add('active');
+
+  document.getElementById('progress-body').innerHTML=`
+    <div class="result-wrap">
+      <div class="result-hero">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">${catDef.icon||''} ${catDef.label}${lapText} 完了！</div>
+        <div class="result-pct">${pct}%</div>
+        <div class="result-sub">${correct}問正解 / ${total}問中</div>
+        <div class="result-bd">
+          <div class="rb"><div class="rb-n c">${correct}</div><div class="rb-l">正解</div></div>
+          <div class="rb"><div class="rb-n w">${wrong}</div><div class="rb-l">不正解</div></div>
+          <div class="rb"><div class="rb-n s">${essay}</div><div class="rb-l">記述(自己採点)</div></div>
+        </div>
+        <div class="result-acts">
+          ${qs.mode==='fixed'||qs.mode==='review'
+            ?`<button class="btn-s" onclick="startQuizByCategory('${qs.category}')">続きを解く</button>`
+            :`<button class="btn-s" onclick="startQuizByCategory('${qs.category}')">もう一度（別の問題）</button>`}
+          <button class="btn-p" style="width:auto;padding:12px 24px" onclick="nav('home')">ホームへ</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px">今回の回答履歴</div>
+        <div class="ans-list">
+          ${qs.answers.map((a,i)=>{
+            const q2=qs.questions[i];
+            const cls=a.answer===null?'sk':a.correct===true?'ok':a.correct===false?'ng':'es';
+            const label=a.answer===null?'スキップ':a.correct===true?'正解':a.correct===false?'不正解':'自己採点';
+            return `<div class="ans-item ${cls}">
+              <div class="ans-q">${q2.question.substring(0,60)}... <span class="s-badge ${cls}">${label}</span></div>
+              <div class="ans-a">${a.answer!==null?String(a.answer).substring(0,80):'—'}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== PROGRESS =====
+async function renderProgress(){
+  const el=document.getElementById('progress-body');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+  try{
+    const snap=await getDoc(doc(db,'users',currentUser.uid));
+    const u=snap.data();
+    currentUser.fixedProgress=u.fixedProgress||{};
+    currentUser.stats=u.stats||{};
+    const fp=currentUser.fixedProgress, stats=currentUser.stats;
+
+    const modes=[
+      {key:'fixed',   label:'① 固定問題モード',   icon:'📌', color:'var(--accent)',  cats:['js_basic','dom']},
+      {key:'review',  label:'② 復習問題モード',   icon:'🔁', color:'var(--orange)', cats:['java_review','db_review']},
+      {key:'challenge',label:'③ チャレンジモード', icon:'🔥', color:'var(--warn)',   cats:['java_challenge','db_challenge']},
+    ];
+
+    const sections=modes.map(m=>`
+      <div style="margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;
+          font-size:15px;font-weight:700;padding-bottom:10px;border-bottom:2px solid var(--border)">
+          <span>${m.icon}</span><span>${m.label}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+          ${m.cats.map(cat=>progressCatCard(cat,fp,stats,m.color)).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    el.innerHTML=sections;
+  }catch(e){el.innerHTML=`<p style="color:var(--warn)">読み込みエラー: ${e.message}</p>`;}
+}
+
+function progressCatCard(cat,fp,stats,modeColor){
+  const catDef=CATEGORIES[cat];
+  const catFp=fp[cat]||{};
+  const catStats=stats[cat]||{};
+  const lapNums=Object.keys(catStats).map(Number).sort((a,b)=>a-b);
+  const currentLap=lapNums.length>0?Math.max(...lapNums):1;
+  // 現在回の回答数で進捗表示
+  const done=Object.keys(catFp).filter(id=>catFp[id]&&catFp[id].lap===currentLap).length;
+  const total=catDef.total;
+  const pct=Math.round(done/total*100);
+  const lapSt=catStats[String(currentLap)]||{answered:0,correct:0};
+  const rate=(lapSt.answered||0)>0?Math.round((lapSt.correct||0)/(lapSt.answered||0)*100):0;
+  const correctCount=Object.values(catFp).filter(v=>v.correct===true&&v.lap===currentLap).length;
+  const wrongCount=Object.values(catFp).filter(v=>v.correct===false&&v.lap===currentLap).length;
+  const essayCount=Object.values(catFp).filter(v=>v.correct===null&&v.lap===currentLap).length;
+  const rateColor=rate>=80?'var(--accent2)':rate>=60?'var(--gold)':'var(--warn)';
+
+  // 受講回数バッジ（全回）
+  const lapHistory=lapNums.map(l=>{
+    const ls=catStats[String(l)]||{answered:0,correct:0};
+    const r=(ls.answered||0)>0?Math.round((ls.correct||0)/(ls.answered||0)*100):0;
+    const isCurrent=l===currentLap;
+    return `<div style="
+      display:flex;justify-content:space-between;align-items:center;
+      padding:8px 12px;border-radius:6px;margin-top:6px;
+      background:${isCurrent?'rgba(255,209,102,.08)':'var(--bg)'};
+      border:1px solid ${isCurrent?'rgba(255,209,102,.3)':'var(--border)'};
+    ">
+      <span style="font-size:12px;color:${isCurrent?'var(--gold)':'var(--muted)'};font-weight:${isCurrent?'700':'400'}">
+        第${l}回${isCurrent?' ◀ 現在':''}
+      </span>
+      <span style="font-size:12px;font-family:var(--mono)">${ls.answered||0}問 / 正解${ls.correct||0} / ${r}%</span>
+    </div>`;
+  }).join('');
+
+  return `
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div style="padding:16px 20px;border-left:4px solid ${modeColor}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:15px;font-weight:700">${catDef.icon} ${catDef.label}</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--muted)">${done}/${total}問</div>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:5px">
+        <div style="height:100%;width:${pct}%;background:${modeColor};border-radius:4px;transition:width .6s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:14px">
+        <span>進捗 ${pct}%</span>
+        <span>今回の正答率 <b style="color:${rateColor}">${rate}%</b></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div style="text-align:center;background:var(--bg);border-radius:8px;padding:10px 4px">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent2)">${correctCount}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">正解</div>
+        </div>
+        <div style="text-align:center;background:var(--bg);border-radius:8px;padding:10px 4px">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--warn)">${wrongCount}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">不正解</div>
+        </div>
+        <div style="text-align:center;background:var(--bg);border-radius:8px;padding:10px 4px">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--gold)">${essayCount}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">記述</div>
+        </div>
+      </div>
+      ${lapNums.length>0?`
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">受講履歴</div>
+        ${lapHistory}
+      `:`<div style="font-size:13px;color:var(--muted);text-align:center;padding:8px">未受講</div>`}
+    </div>
+  </div>`;
+}
+
+// ===== DIARY =====
+function initStars(){
+  document.querySelectorAll('#diary-stars .star').forEach(s=>{
+    s.addEventListener('mouseenter',()=>{
+      const v=parseInt(s.dataset.v);
+      document.querySelectorAll('#diary-stars .star').forEach(st=>st.classList.toggle('on',parseInt(st.dataset.v)<=v));
+    });
+    s.addEventListener('mouseleave',()=>{
+      document.querySelectorAll('#diary-stars .star').forEach(st=>st.classList.toggle('on',parseInt(st.dataset.v)<=diaryRating));
+    });
+    s.addEventListener('click',()=>{
+      diaryRating=parseInt(s.dataset.v);
+      document.querySelectorAll('#diary-stars .star').forEach(st=>st.classList.toggle('on',parseInt(st.dataset.v)<=diaryRating));
+    });
+  });
+}
+window.saveDiary=async function(){
+  const date=document.getElementById('diary-date').value;
+  const challenge=document.getElementById('diary-challenge').value.trim();
+  const memo=document.getElementById('diary-memo').value.trim();
+  if(!date) return toast('日付を選択してください','error');
+  if(diaryRating===0) return toast('理解度を選択してください','error');
+  try{
+    await addDoc(collection(db,'diaries'),{uid:currentUser.uid,userName:currentUser.name,date,challenge,memo,rating:diaryRating,createdAt:serverTimestamp()});
+    toast('日記を保存しました！','success');
+    document.getElementById('diary-date').value=today();
+    document.getElementById('diary-challenge').value='';
+    document.getElementById('diary-memo').value='';
+    diaryRating=0;
+    document.querySelectorAll('#diary-stars .star').forEach(s=>s.classList.remove('on'));
+    renderDiary();
+  }catch(e){toast('保存エラー: '+e.message,'error');}
+};
+async function renderDiary(){
+  const list=document.getElementById('diary-list');
+  list.innerHTML='<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+  try{
+    const q=query(collection(db,'diaries'),where('uid','==',currentUser.uid),orderBy('createdAt','desc'));
+    const snap=await getDocs(q);
+    const entries=snap.docs.map(d=>d.data());
+    if(entries.length===0){list.innerHTML='<p style="color:var(--muted)">まだ日記がありません。</p>';return;}
+    list.innerHTML=entries.map(e=>`
+      <div class="diary-entry">
+        <div class="de-head">
+          <span class="de-date">📅 ${e.date}</span>
+          <span class="de-rating">${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)} ${e.rating}/5</span>
+        </div>
+        <div class="de-body">
+          ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
+          ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+        </div>
+      </div>`).join('');
+  }catch(e){list.innerHTML='<p style="color:var(--warn)">読み込みエラー</p>';}
+}
+
+// ===== ADMIN =====
+async function renderAdminHome(){
+  try{
+    const usersSnap=await getDocs(query(collection(db,'users'),where('role','==','learner')));
+    const users=usersSnap.docs.map(d=>({id:d.id,...d.data()}));
+    const diarySnap=await getDocs(collection(db,'diaries'));
+
+    let totalDone=0;
+    users.forEach(u=>{
+      const fp=u.fixedProgress||{};
+      MANAGED_CATS.forEach(cat=>{ totalDone+=Object.keys(fp[cat]||{}).length; });
+    });
+
+    document.getElementById('admin-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">受講者数</div></div>
+      <div class="stat-card"><div class="stat-num">${totalDone}</div><div class="stat-label">総完了問題数</div></div>
+      <div class="stat-card"><div class="stat-num">${diarySnap.docs.length}</div><div class="stat-label">日記件数</div></div>
+    `;
+
+    const recentDiaries=diarySnap.docs.map(d=>d.data())
+      .filter(d=>d.createdAt).sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds).slice(0,5);
+    document.getElementById('admin-home-body').innerHTML=`
+      <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:12px">最近の学習日記</div>
+      <div class="diary-entries">${recentDiaries.map(e=>`
+        <div class="diary-entry">
+          <div class="de-head">
+            <span style="color:var(--accent);font-weight:600">${e.userName||'—'}</span>
+            <span class="de-date">${e.date}</span>
+            <span class="de-rating">${'★'.repeat(e.rating||0)} ${e.rating||0}/5</span>
+          </div>
+          <div class="de-body">
+            ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
+            ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+          </div>
+        </div>`).join('')||'<p style="color:var(--muted)">まだ日記がありません。</p>'}
+      </div>
+    `;
+  }catch(e){console.error(e);}
+}
+
+async function renderAdminUsers(){
+  const el=document.getElementById('user-cards');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+  try{
+    const snap=await getDocs(query(collection(db,'users'),where('role','==','learner')));
+    const users=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(users.length===0){el.innerHTML='<p style="color:var(--muted)">受講者がいません。</p>';return;}
+
+    // 全体サマリー
+    const totalQ=MANAGED_CATS.reduce((a,c)=>a+(CATEGORIES[c].total||0),0);
+    el.innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+        ${users.map(u=>{
+          const fp=u.fixedProgress||{};
+          const stats=u.stats||{};
+          let done=0,ans=0,cor=0;
+          MANAGED_CATS.forEach(cat=>{
+            done+=Object.keys(fp[cat]||{}).length;
+            Object.values(stats[cat]||{}).forEach(ls=>{ans+=ls.answered||0;cor+=ls.correct||0;});
+          });
+          const rate=ans>0?Math.round(cor/ans*100):0;
+          const pct=Math.round(done/totalQ*100);
+          const rateColor=rate>=80?'var(--accent2)':rate>=60?'var(--gold)':'var(--warn)';
+          const initials=(u.name||'?').charAt(0).toUpperCase();
+
+          // モード別進捗バー
+          const modeBars=[
+            {label:'固定',  color:'var(--accent)',  cats:['js_basic','dom']},
+            {label:'復習',  color:'var(--orange)', cats:['java_review','db_review']},
+            {label:'挑戦',  color:'var(--warn)',   cats:['java_challenge','db_challenge']},
+
+          ].map(m=>{
+            const mTotal=m.cats.reduce((a,c)=>a+(CATEGORIES[c].total||0),0);
+            const mDone=m.cats.reduce((a,c)=>a+Object.keys(fp[c]||{}).length,0);
+            const mPct=Math.round(mDone/mTotal*100);
+            return `<div style="margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px">
+                <span>${m.label}</span><span>${mDone}/${mTotal}</span>
+              </div>
+              <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+                <div style="height:100%;width:${mPct}%;background:${m.color};border-radius:2px"></div>
+              </div>
+            </div>`;
+          }).join('');
+
+          return `
+          <div onclick="showUserDetail('${u.id}')" class="admin-user-card" style="
+            background:var(--surface);border:1px solid var(--border);border-radius:12px;
+            padding:20px;cursor:pointer;
+          ">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <div style="width:44px;height:44px;border-radius:50%;flex-shrink:0;
+                background:linear-gradient(135deg,var(--accent),var(--purple));
+                display:flex;align-items:center;justify-content:center;
+                font-weight:700;font-size:18px;color:#000">${initials}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name}</div>
+                <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.email}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+              <div style="text-align:center;background:var(--bg);border-radius:8px;padding:10px 4px">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent)">${done}</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">完了問題</div>
+              </div>
+              <div style="text-align:center;background:var(--bg);border-radius:8px;padding:10px 4px">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:600;color:${rateColor}">${rate}%</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">正答率</div>
+              </div>
+              <div style="text-align:center;background:var(--bg);border-radius:8px;padding:10px 4px">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--gold)">${pct}%</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">全体進捗</div>
+              </div>
+            </div>
+            ${modeBars}
+            <div style="text-align:right;font-size:12px;color:var(--accent);margin-top:8px">詳細を見る →</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }catch(e){el.innerHTML=`<p style="color:var(--warn)">エラー: ${e.message}</p>`;}
+}
+
+window.showUserDetail=async function(uid){
+  document.getElementById('admin-list-view').style.display='none';
+  document.getElementById('admin-detail-view').style.display='block';
+  const el=document.getElementById('admin-detail-body');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+  try{
+    const snap=await getDoc(doc(db,'users',uid));
+    const u={id:uid,...snap.data()};
+    const fp=u.fixedProgress||{};
+    const stats=u.stats||{};
+    const diarySnap=await getDocs(query(collection(db,'diaries'),where('uid','==',uid),orderBy('createdAt','desc')));
+    const diaries=diarySnap.docs.map(d=>d.data());
+
+    const modes=[
+      {label:'① 固定問題モード',   icon:'📌', color:'var(--accent)',  cats:['js_basic','dom']},
+      {label:'② 復習問題モード',   icon:'🔁', color:'var(--orange)', cats:['java_review','db_review']},
+      {label:'③ チャレンジモード', icon:'🔥', color:'var(--warn)',   cats:['java_challenge','db_challenge']},
+
+    ];
+
+    const catSections=modes.map(m=>`
+      <div style="margin-bottom:24px">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;
+          display:flex;align-items:center;gap:6px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+          ${m.icon} ${m.label}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
+          ${m.cats.map(cat=>{
+            const catDef=CATEGORIES[cat];
+            const catFp=fp[cat]||{};
+            const catStats=stats[cat]||{};
+            const lapNums=Object.keys(catStats).map(Number).sort((a,b)=>a-b);
+            const currentLapAdmin=lapNums.length>0?Math.max(...lapNums):1;
+            // 現在回の回答数で進捗表示
+            const done=Object.keys(catFp).filter(id=>catFp[id]&&catFp[id].lap===currentLapAdmin).length;
+            const total=catDef.total;
+            const pct=Math.round(done/total*100);
+            return `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+              <div style="padding:14px 16px;border-left:4px solid ${m.color}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                  <span style="font-size:14px;font-weight:700">${catDef.icon} ${catDef.label}</span>
+                  <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${done}/${total} (${pct}%)</span>
+                </div>
+                <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px">
+                  <div style="height:100%;width:${pct}%;background:${m.color};border-radius:3px"></div>
+                </div>
+                ${lapNums.length>0
+                  ?`<table style="width:100%;border-collapse:collapse;font-size:12px">
+                      <thead><tr>
+                        <th style="text-align:left;padding:4px 8px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">受講回</th>
+                        <th style="text-align:center;padding:4px 8px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">回答</th>
+                        <th style="text-align:center;padding:4px 8px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">正解</th>
+                        <th style="text-align:right;padding:4px 8px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">正答率</th>
+                      </tr></thead>
+                      <tbody>${lapNums.map(l=>{
+                        const ls=catStats[String(l)]||{answered:0,correct:0};
+                        const r=(ls.answered||0)>0?Math.round((ls.correct||0)/(ls.answered||0)*100):0;
+                        const rColor=r>=80?'var(--accent2)':r>=60?'var(--gold)':'var(--warn)';
+                        const isLatest=l===Math.max(...lapNums);
+                        return `<tr style="background:${isLatest?'rgba(255,209,102,.04)':'transparent'}">
+                          <td style="padding:6px 8px;color:${isLatest?'var(--gold)':'var(--text)'};font-weight:${isLatest?'700':'400'}">第${l}回${isLatest?' ◀':''}</td>
+                          <td style="padding:6px 8px;text-align:center;color:var(--muted)">${ls.answered||0}</td>
+                          <td style="padding:6px 8px;text-align:center;color:var(--accent2)">${ls.correct||0}</td>
+                          <td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:${rColor}">${r}%</td>
+                        </tr>`;
+                      }).join('')}</tbody>
+                    </table>`
+                  :`<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px">未受講</div>`}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    // 合計サマリー
+    let totalDone=0,totalAns=0,totalCor=0;
+    const totalQ=MANAGED_CATS.reduce((a,c)=>a+(CATEGORIES[c].total||0),0);
+    MANAGED_CATS.forEach(cat=>{
+      totalDone+=Object.keys(fp[cat]||{}).length;
+      Object.values(stats[cat]||{}).forEach(ls=>{totalAns+=ls.answered||0;totalCor+=ls.correct||0;});
+    });
+    const totalRate=totalAns>0?Math.round(totalCor/totalAns*100):0;
+    const totalPct=Math.round(totalDone/totalQ*100);
+
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px">
+        <div style="width:52px;height:52px;border-radius:50%;flex-shrink:0;
+          background:linear-gradient(135deg,var(--accent),var(--purple));
+          display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#000">
+          ${(u.name||'?').charAt(0)}
+        </div>
+        <div style="flex:1">
+          <div style="font-size:20px;font-weight:700">${u.name}</div>
+          <div style="color:var(--muted);font-size:13px">${u.email}</div>
+        </div>
+        <div style="display:flex;gap:16px">
+          <div style="text-align:center">
+            <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent)">${totalDone}/${totalQ}</div>
+            <div style="font-size:11px;color:var(--muted)">完了問題</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--gold)">${totalPct}%</div>
+            <div style="font-size:11px;color:var(--muted)">全体進捗</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent2)">${totalRate}%</div>
+            <div style="font-size:11px;color:var(--muted)">正答率</div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-tabs">
+        <button class="atab active" onclick="switchAtab(0,this)">📊 成績・進捗</button>
+        <button class="atab" onclick="switchAtab(1,this)">📔 学習日記 (${diaries.length})</button>
+      </div>
+      <div class="atab-panel active" id="atp-0">${catSections}</div>
+      <div class="atab-panel" id="atp-1">
+        ${diaries.length===0?'<p style="color:var(--muted);padding:20px 0">日記がありません。</p>':`
+          <div class="diary-entries">${diaries.map(e=>`
+            <div class="diary-entry">
+              <div class="de-head">
+                <span class="de-date">📅 ${e.date}</span>
+                <span class="de-rating">${'★'.repeat(e.rating||0)} ${e.rating||0}/5</span>
+              </div>
+              <div class="de-body">
+                ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
+                ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+              </div>
+            </div>`).join('')}
+          </div>`}
+      </div>
+    `;
+  }catch(e){el.innerHTML=`<p style="color:var(--warn)">エラー: ${e.message}</p>`;}
+};
+window.switchAtab=function(idx,btn){
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.atab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('atp-'+idx).classList.add('active');
+};
+window.backToList=function(){
+  document.getElementById('admin-list-view').style.display='block';
+  document.getElementById('admin-detail-view').style.display='none';
+};
+async function renderAdminDiary(){
+  const el=document.getElementById('admin-diary-body');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+  try{
+    const snap=await getDocs(query(collection(db,'diaries'),orderBy('createdAt','desc')));
+    const entries=snap.docs.map(d=>d.data());
+    if(entries.length===0){el.innerHTML='<p style="color:var(--muted)">日記がありません。</p>';return;}
+    el.innerHTML=`<div class="diary-entries">${entries.map(e=>`
+      <div class="diary-entry">
+        <div class="de-head">
+          <span style="color:var(--accent);font-weight:600">${e.userName||'—'}</span>
+          <span class="de-date">${e.date}</span>
+          <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
+        </div>
+        <div class="de-body">
+          ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
+          ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+        </div>
+      </div>`).join('')}</div>`;
+  }catch(e){el.innerHTML=`<p style="color:var(--warn)">エラー: ${e.message}</p>`;}
+}
+
+// ===== UTILS =====
+function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');}
+function setErr(m){document.getElementById('login-err').textContent=m;}
+function clearErr(){document.getElementById('login-err').textContent='';}
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',3000);
+}
+function today(){return new Date().toISOString().split('T')[0];}
+function authErr(code){
+  return {
+    'auth/user-not-found':'メールが見つかりません',
+    'auth/wrong-password':'パスワードが間違っています',
+    'auth/email-already-in-use':'このメールはすでに使用されています',
+    'auth/weak-password':'パスワードは6文字以上',
+    'auth/invalid-email':'正しいメールアドレスを入力してください',
+    'auth/invalid-credential':'メールまたはパスワードが正しくありません',
+    'auth/too-many-requests':'ログイン試行が多すぎます。しばらく待ってから再試行してください',
+    'auth/network-request-failed':'ネットワークエラーが発生しました',
+    'auth/user-disabled':'このアカウントは無効になっています',
+    'permission-denied':'アクセス権限がありません。管理者にお問い合わせください',
+    'auth/operation-not-allowed':'この操作は許可されていません',
+  }[code] || 'エラーが発生しました（'+code+'）';
+}
+</script>
+</body>
+</html>
