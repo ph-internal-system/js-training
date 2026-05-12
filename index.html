@@ -268,6 +268,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .diary-form-title{font-size:15px;font-weight:700;color:var(--accent);margin-bottom:20px;}
 .form-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .fg-d label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px;letter-spacing:1px;text-transform:uppercase;}
+.required-mark{font-size:10px;color:#e53935;font-weight:700;letter-spacing:0;margin-left:4px;vertical-align:middle;}
 .fg-d input,.fg-d textarea{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);
   border-radius:var(--radius);color:var(--text);font-size:14px;font-family:var(--sans);transition:.2s;}
 .fg-d input:focus,.fg-d textarea:focus{outline:none;border-color:var(--accent);}
@@ -442,9 +443,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
         <div class="page-sub">毎日の学習を記録しましょう。</div>
         <div class="diary-form-card">
           <div class="diary-form-title">✏️ 今日の記録を追加</div>
-          <div class="form-2col">
-            <div class="fg-d"><label>実施日</label><input type="date" id="diary-date"></div>
-            <div class="fg-d"><label>理解度</label>
+          <div class="form-2col" style="grid-template-columns:1fr 2fr">
+            <div class="fg-d"><label>実施日<span class="required-mark">*</span></label><input type="date" id="diary-date"></div>
+            <div class="fg-d"><label>本日の理解度<span class="required-mark">*</span></label>
               <div class="stars" id="diary-stars">
                 <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
                 <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span>
@@ -452,7 +453,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
               </div>
             </div>
           </div>
-          <div class="fg-d" style="margin-top:14px"><label>課題・難しかった点</label><textarea id="diary-challenge" placeholder="例：クロージャの概念がまだ難しい..."></textarea></div>
+          <div class="fg-d" style="margin-top:14px"><label>本日学習した内容<span class="required-mark">*</span></label><textarea id="diary-content" placeholder="例：配列のメソッド（map、filter、reduce）を学習しました..."></textarea></div>
+          <div class="fg-d" style="margin-top:14px"><label>課題・不安・難しかった点など</label><textarea id="diary-challenge" placeholder="例：クロージャの概念がまだ難しい..."></textarea></div>
           <div class="fg-d" style="margin-top:12px"><label>その他・メモ</label><textarea id="diary-memo" placeholder="自由にメモ..."></textarea></div>
           <button class="btn-p" style="width:auto;padding:12px 28px;margin-top:16px" onclick="saveDiary()">記録を保存</button>
         </div>
@@ -1517,14 +1519,17 @@ function initStars(){
 }
 window.saveDiary=async function(){
   const date=document.getElementById('diary-date').value;
+  const content=document.getElementById('diary-content').value.trim();
   const challenge=document.getElementById('diary-challenge').value.trim();
   const memo=document.getElementById('diary-memo').value.trim();
-  if(!date) return toast('日付を選択してください','error');
-  if(diaryRating===0) return toast('理解度を選択してください','error');
+  if(!date) return toast('実施日を選択してください','error');
+  if(diaryRating===0) return toast('本日の理解度を選択してください','error');
+  if(!content) return toast('本日学習した内容を入力してください','error');
   try{
-    await addDoc(collection(db,'diaries'),{uid:currentUser.uid,userName:currentUser.name,date,challenge,memo,rating:diaryRating,createdAt:serverTimestamp()});
+    await addDoc(collection(db,'diaries'),{uid:currentUser.uid,userName:currentUser.name,date,content,challenge,memo,rating:diaryRating,createdAt:serverTimestamp()});
     toast('日記を保存しました！','success');
     document.getElementById('diary-date').value=today();
+    document.getElementById('diary-content').value='';
     document.getElementById('diary-challenge').value='';
     document.getElementById('diary-memo').value='';
     diaryRating=0;
@@ -1547,6 +1552,7 @@ async function renderDiary(){
           <span class="de-rating">${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)} ${e.rating}/5</span>
         </div>
         <div class="de-body">
+          ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
           ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
           ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
         </div>
@@ -1585,6 +1591,7 @@ async function renderAdminHome(){
             <span class="de-rating">${'★'.repeat(e.rating||0)} ${e.rating||0}/5</span>
           </div>
           <div class="de-body">
+            ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
             ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
             ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
           </div>
@@ -1804,6 +1811,7 @@ window.showUserDetail=async function(uid){
                 <span class="de-rating">${'★'.repeat(e.rating||0)} ${e.rating||0}/5</span>
               </div>
               <div class="de-body">
+                ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
                 ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
                 ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
               </div>
@@ -1838,6 +1846,7 @@ async function renderAdminDiary(){
           <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
         </div>
         <div class="de-body">
+          ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
           ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
           ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
         </div>
