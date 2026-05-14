@@ -551,6 +551,7 @@ let QUESTIONS = [];
 let currentUser = null;
 let currentRole = null;
 let diaryRating = 0;
+let loginFormMode = null;
 let qs = { mode:null, category:null, lap:1, questions:[], current:0, answers:[], submitted:false };
 let tfSel = null;
 
@@ -591,30 +592,49 @@ onAuthStateChanged(auth, async user=>{
   if (user) {
     const snap = await getDoc(doc(db,'users',user.uid));
     if (snap.exists()) {
+      const role = snap.data().role || 'learner';
+      if(loginFormMode === 'learner' && role === 'admin'){
+        loginFormMode = null;
+        setLoading('btn-login', false);
+        await signOut(auth);
+        setErr('管理者アカウントは管理者ログインをご利用ください');
+        return;
+      }
+      loginFormMode = null;
       currentUser = { uid:user.uid, ...snap.data() };
-      currentRole = snap.data().role || 'learner';
+      currentRole = role;
       currentUser.role = currentRole;
       await loadQuestions();
       initApp();
     } else {
-      // usersドキュメントが存在しない場合は最大5回リトライ（3秒×5回=15秒）
-      let retrySnap = null;
-      for(let i=0; i<5; i++){
-        await new Promise(r => setTimeout(r, 3000));
-        retrySnap = await getDoc(doc(db,'users',user.uid));
-        if(retrySnap.exists()) break;
-      }
-      if(retrySnap && retrySnap.exists()){
-        currentUser = { uid:user.uid, ...retrySnap.data() };
-        currentRole = retrySnap.data().role || 'learner';
-        currentUser.role = currentRole;
-        await loadQuestions();
-        initApp();
-      } else {
+      // usersドキュメントが存在しない → allowed_usersを確認して自動作成
+      try{
+        const allowSnap = await getDoc(doc(db,'allowed_users',user.email));
+        if(allowSnap.exists()){
+          const name = allowSnap.data().name || user.email;
+          const ep = emptyProgress();
+          await setDoc(doc(db,'users',user.uid),{
+            name, email:user.email, role:'learner', createdAt:serverTimestamp(),
+            fixedProgress: ep.fixedProgress,
+            stats: ep.stats
+          });
+          try{ await updateDoc(doc(db,'allowed_users',user.email),{registered:true}); }catch(e2){}
+          currentUser = {uid:user.uid, name, email:user.email, role:'learner'};
+          currentRole = 'learner';
+          currentUser.role = 'learner';
+          await loadQuestions();
+          initApp();
+        } else {
+          await signOut(auth);
+          currentUser=null;
+          showScreen('login');
+          setErr('登録できません。管理者にお問い合わせください。');
+        }
+      }catch(e){
         await signOut(auth);
         currentUser=null;
         showScreen('login');
-        setErr('登録処理に時間がかかっています。しばらく待ってから再度ログインしてください。');
+        setErr('ログイン処理に失敗しました。');
       }
     }
   } else { currentUser=null; showScreen('login'); }
@@ -648,7 +668,7 @@ window.showPane = p=>{
 window.loginLearner = async()=>{
   const email=document.getElementById('l-email').value.trim(), pass=document.getElementById('l-pass').value;
   if(!email||!pass) return setErr('入力してください');
-  // role判定はログイン後にFirestoreで行う
+  loginFormMode = 'learner';
   setLoading('btn-login', true);
   try{
     await signInWithEmailAndPassword(auth,email,pass);
