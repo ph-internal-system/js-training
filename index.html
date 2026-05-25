@@ -349,6 +349,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .learn-theme-card.css:hover{border-color:#a78bfa;}
 .learn-theme-card.js{border-color:rgba(247,223,30,.4);}
 .learn-theme-card.js:hover{border-color:#f7df1e;}
+.learn-theme-card.git{border-color:rgba(240,81,51,.4);}
+.learn-theme-card.git:hover{border-color:#f05133;}
 .html-preview{background:#fff;border:1px solid #ccc;border-radius:8px;overflow:hidden;margin:16px 0;}
 .html-preview-bar{background:#e5e5e5;padding:6px 14px;font-size:11px;color:#555;border-bottom:1px solid #ccc;}
 .html-preview-body{padding:16px 20px;color:#222 !important;font-family:sans-serif;font-size:14px;line-height:1.7;}
@@ -538,7 +540,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
         <!-- テーマ選択 -->
         <div class="learn-view active" id="learn-view-themes">
           <div class="page-title">学習する</div>
-          <div class="page-sub">復習したいテーマを選んでください。</div>
+          <div class="page-sub">学習したいテーマを選んでください。</div>
           <div class="learn-theme-grid">
             <div class="learn-theme-card java" onclick="learnSelectTheme('java')">
               <div class="learn-theme-icon">☕</div>
@@ -551,12 +553,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
               <div class="learn-theme-title">DB</div>
               <div class="learn-theme-desc">SQL・テーブル結合・トランザクション・インデックス・ER図など</div>
               <span class="learn-theme-count" style="color:var(--gold);background:rgba(255,209,102,.1)">0 章</span>
-            </div>
-            <div class="learn-theme-card web" onclick="learnSelectTheme('web')">
-              <div class="learn-theme-icon">🌐</div>
-              <div class="learn-theme-title">Webシステム</div>
-              <div class="learn-theme-desc">HTTP・HTML/CSS・セッション・非同期・セキュリティなど</div>
-              <span class="learn-theme-count" style="color:var(--accent);background:rgba(0,212,255,.1)">0 章</span>
             </div>
             <div class="learn-theme-card html" onclick="learnSelectTheme('html')">
               <div class="learn-theme-icon">📄</div>
@@ -575,6 +571,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
               <div class="learn-theme-title">JavaScript</div>
               <div class="learn-theme-desc">変数・関数・DOM操作・非同期処理など</div>
               <span class="learn-theme-count" style="color:#f7df1e;background:rgba(247,223,30,.1)">0 章</span>
+            </div>
+            <div class="learn-theme-card web" onclick="learnSelectTheme('web')">
+              <div class="learn-theme-icon">🌐</div>
+              <div class="learn-theme-title">Webシステム</div>
+              <div class="learn-theme-desc">HTTP・HTML/CSS・セッション・非同期・セキュリティなど</div>
+              <span class="learn-theme-count" style="color:var(--accent);background:rgba(0,212,255,.1)">0 章</span>
+            </div>
+            <div class="learn-theme-card git" onclick="learnSelectTheme('git')">
+              <div class="learn-theme-icon">🌿</div>
+              <div class="learn-theme-title">Git</div>
+              <div class="learn-theme-desc">バージョン管理・ブランチ・GitHub・チーム開発の流れなど</div>
+              <span class="learn-theme-count" style="color:#f05133;background:rgba(240,81,51,.1)">0 章</span>
             </div>
           </div>
         </div>
@@ -924,8 +932,54 @@ const LEARN_DATA = {
       {
         title: '1. クラス',
         content: `
+<h3>オブジェクトとは</h3>
+<p><strong>オブジェクト</strong>とは、<strong>データ（フィールド）と処理（メソッド）をひとまとめにしたもの</strong>です。たとえば「犬」というオブジェクトなら、名前・年齢といったデータと、鳴く・走るといった処理を1つの塊として扱います。</p>
+<p>現実世界の「モノ」や「概念」をプログラム上で表現する考え方を<strong>オブジェクト指向</strong>といい、Javaはこの考え方をベースに設計された言語です。</p>
+
 <h3>クラスとインスタンス</h3>
 <p>クラスはオブジェクトの「設計図」です。<code>new</code> キーワードで設計図から作られた実体を<strong>インスタンス</strong>といいます。設計図（クラス）は1つでも、インスタンスはいくつでも独立して作れます。</p>
+<div class="learn-point">
+  <strong>クラス</strong>（設計図）：「どんなデータを持ち、何ができるか」を定義したテンプレート<br>
+  <strong>インスタンス</strong>（実体）：その設計図をもとに <code>new</code> で実際にメモリ上に作られた具体的なオブジェクト
+</div>
+
+<div class="learn-point">
+  <strong>クラスとインスタンスの関係</strong>
+  <div style="margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;">
+    <div style="background:rgba(255,159,67,.15);border:2px solid rgba(255,159,67,.6);border-radius:10px;padding:12px 24px;text-align:center;min-width:220px;">
+      <div style="font-weight:bold;color:var(--orange);margin-bottom:6px;">Animal クラス（設計図）</div>
+      <div style="display:flex;gap:24px;justify-content:center;font-size:12px;color:var(--text);">
+        <div>
+          <div style="font-weight:bold;margin-bottom:2px;">フィールド</div>
+          <div>name: String</div>
+        </div>
+        <div>
+          <div style="font-weight:bold;margin-bottom:2px;">メソッド</div>
+          <div>speak()</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="color:var(--accent);font-size:12px;">new Animal("ポチ")</div>
+        <div style="color:var(--accent);">↓</div>
+        <div style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.4);border-radius:8px;padding:10px 16px;text-align:center;font-size:12px;">
+          <div style="font-weight:bold;color:var(--accent);margin-bottom:4px;">dog（インスタンス）</div>
+          <div>name = "ポチ"</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="color:var(--accent);font-size:12px;">new Animal("ミケ")</div>
+        <div style="color:var(--accent);">↓</div>
+        <div style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.4);border-radius:8px;padding:10px 16px;text-align:center;font-size:12px;">
+          <div style="font-weight:bold;color:var(--accent);margin-bottom:4px;">cat（インスタンス）</div>
+          <div>name = "ミケ"</div>
+        </div>
+      </div>
+    </div>
+    <p style="margin:4px 0 0;font-size:12px;color:var(--text);text-align:center;">同じ設計図から、独立した複数のインスタンスを生成できる</p>
+  </div>
+</div>
 <pre><code>public class Animal {
     private String name;
 
@@ -1301,7 +1355,57 @@ classDiagram
 </div>
 
 <h3>ポリモーフィズム</h3>
-<p>インターフェース型の変数に実装クラスのインスタンスを代入できます。実装クラスを切り替えても呼び出し側のコードを変える必要がありません。これを<strong>ポリモーフィズム（多態性）</strong>といいます。</p>
+<p><strong>ポリモーフィズム（多態性）</strong>とは、<strong>同じメソッド呼び出しでも、オブジェクトの種類に応じて異なる動作をする</strong>性質のことです。ギリシャ語で「多くの形を持つ」という意味です。</p>
+<p>親クラスやインターフェース型の変数に、異なるサブクラスのインスタンスを代入できます。呼び出し側は型の詳細を知らなくても同じコードで動かせるため、<strong>実装の追加・切り替えが容易</strong>になります。</p>
+
+<h3>継承を使った基本例</h3>
+<pre><code>// 親クラス
+public class Animal {
+    public void speak() {
+        System.out.println("...");
+    }
+}
+
+// 子クラス（それぞれ speak() をオーバーライド）
+public class Dog extends Animal {
+    @Override
+    public void speak() {
+        System.out.println("ワン！");
+    }
+}
+
+public class Cat extends Animal {
+    @Override
+    public void speak() {
+        System.out.println("ニャー！");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // 親クラス型の変数に子クラスのインスタンスを代入できる
+        Animal a1 = new Dog();
+        Animal a2 = new Cat();
+
+        a1.speak();  // → ワン！（Dog の speak が呼ばれる）
+        a2.speak();  // → ニャー！（Cat の speak が呼ばれる）
+
+        // 配列にまとめて一括処理できる
+        Animal[] animals = { new Dog(), new Cat(), new Dog() };
+        for (Animal a : animals) {
+            a.speak();  // それぞれの型に応じたメソッドが呼ばれる
+        }
+    }
+}</code></pre>
+
+<div class="learn-point">
+  <strong>ポリモーフィズムのメリット</strong><br>
+  呼び出し側（Main）は <code>Animal</code> 型として扱うだけでよく、Dog・Cat などの実装詳細を知る必要がありません。<br>
+  新しい動物クラス（例：<code>Bird</code>）を追加しても、呼び出し側のコードは<strong>一切変更不要</strong>です。
+</div>
+
+<h3>インターフェースを使ったポリモーフィズム</h3>
+<p>インターフェース型の変数に実装クラスのインスタンスを代入することでも同様に実現できます。</p>
 <pre><code>public class ImageFile implements Printable, Saveable {
     @Override
     public void print() {
@@ -3536,6 +3640,925 @@ public List&lt;User&gt; findByNameContaining(String name) {
   最初はすべてを深く理解しようとせず、「どこで何をしているか」の大まかな地図を持つことから始めましょう。
 </div>`
       },
+      {
+        title: '8. 開発者ツール',
+        content: `
+<h3>開発者ツールとは</h3>
+<p>ブラウザに内蔵されているデバッグ・調査用のツールです。HTMLの構造確認・CSSの変更・JavaScriptのエラー確認など、Web開発に欠かせない機能が揃っています。</p>
+
+<h3>開き方</h3>
+<pre><code>【Windows】
+F12 キー
+または Ctrl + Shift + I
+
+【Mac】
+Cmd + Option + I
+
+【右クリックメニューから】
+ページ上で右クリック → 「検証」または「要素を検証」</code></pre>
+
+<h3>Elementsパネル（要素の検証）</h3>
+<p>HTMLの構造をツリー形式で確認・編集できます。ページ上の要素を右クリック → 「検証」で、その要素に直接ジャンプできます。</p>
+<div class="html-preview">
+  <div class="html-preview-bar">Elementsパネルでできること</div>
+  <div class="html-preview-body">
+    <ul style="margin:0;padding-left:20px;line-height:2;">
+      <li>HTMLの構造をツリー形式で確認</li>
+      <li>要素をクリックすると右側にCSSが表示される</li>
+      <li>HTMLを直接ダブルクリックして一時的に編集できる</li>
+      <li>要素にマウスを重ねるとページ上でハイライト表示される</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Stylesペイン（CSSの確認・変更）</h3>
+<p>Elementsパネルで要素を選択すると、右側に適用されているCSSが一覧表示されます。</p>
+<div class="html-preview">
+  <div class="html-preview-bar">Stylesペインでできること</div>
+  <div class="html-preview-body">
+    <ul style="margin:0;padding-left:20px;line-height:2;">
+      <li>適用されているCSSプロパティを確認できる</li>
+      <li>値をクリックして一時的に変更・試行錯誤できる（保存はされない）</li>
+      <li>打ち消し線のプロパティは他のルールに上書きされているもの</li>
+      <li>どのCSSファイルの何行目に書かれているか表示される</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Consoleパネル（エラーとログの確認）</h3>
+<p>JavaScriptのエラーや <code>console.log()</code> の出力を確認できます。エラーが起きた場合はまずここを確認します。</p>
+<pre><code>// JavaScript でのログ出力
+console.log("確認したい値:", value);   // 通常ログ
+console.warn("警告メッセージ");        // 黄色で表示
+console.error("エラーメッセージ");     // 赤色で表示</code></pre>
+<div class="html-preview">
+  <div class="html-preview-bar">Consoleパネルでできること</div>
+  <div class="html-preview-body">
+    <ul style="margin:0;padding-left:20px;line-height:2;">
+      <li>JavaScriptのエラーが赤字で表示される</li>
+      <li><code>console.log()</code> の出力を確認できる</li>
+      <li>直接JavaScriptを入力して実行できる</li>
+      <li>エラーをクリックするとソースの該当行に飛べる</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Networkパネル（通信の確認）</h3>
+<p>ページが読み込む通信（HTMLファイル・画像・API など）を一覧で確認できます。</p>
+<div class="html-preview">
+  <div class="html-preview-bar">Networkパネルでできること</div>
+  <div class="html-preview-body">
+    <ul style="margin:0;padding-left:20px;line-height:2;">
+      <li>どのファイルを読み込んでいるか確認できる</li>
+      <li>各リクエストのステータスコード（200・404・500 など）を確認できる</li>
+      <li>APIのリクエスト内容・レスポンス内容を確認できる</li>
+      <li>読み込みに時間がかかっているファイルを特定できる</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Sourcesパネル（JavaScriptのデバッグ）</h3>
+<p>JavaScriptのコードを一時停止して、変数の中身や処理の流れを1行ずつ確認できます。<code>console.log()</code> だけでは追いきれない複雑な処理のデバッグに役立ちます。</p>
+<pre><code>// デバッグの基本手順
+// ① F12 → Sources タブを開く
+// ② 左側のファイルツリーからJSファイルを選択
+// ③ 確認したい行番号をクリック → ブレークポイント（赤丸）を設置
+// ④ 処理を実行するとブレークポイントで一時停止する
+// ⑤ 右側のパネルで変数の値を確認しながら1行ずつ進める</code></pre>
+<div class="html-preview">
+  <div class="html-preview-bar">ブレークポイント停止中にできること</div>
+  <div class="html-preview-body">
+    <ul style="margin:0;padding-left:20px;line-height:2;">
+      <li><strong>変数の確認</strong>：右側の「Scope」欄で現在の変数の値を一覧表示</li>
+      <li><strong>ステップ実行</strong>：F10（1行進む）/ F11（関数の中に入る）/ F8（次のブレークポイントまで進む）</li>
+      <li><strong>ウォッチ式</strong>：「Watch」欄に式を追加して値をリアルタイムで監視</li>
+      <li><strong>コールスタック</strong>：「Call Stack」欄でどの関数から呼ばれたか確認できる</li>
+      <li><strong>Consoleで変数を確認</strong>：停止中に Console タブで変数名を入力して値を確認できる</li>
+    </ul>
+  </div>
+</div>
+
+<div class="learn-point">
+  <strong>まず覚えるべき操作</strong><br>
+  ① <code>F12</code> で開発者ツールを開く<br>
+  ② 確認したい要素を右クリック → 「検証」で Elements パネルにジャンプ<br>
+  ③ エラーが出たら Console パネルを確認<br>
+  ④ CSSを試したいときは Styles ペインで値を直接変更してみる（リロードで元に戻る）<br>
+  ⑤ JSの動作を追いたいときは Sources パネルでブレークポイントを設置して1行ずつ確認
+</div>
+
+<h3>参考リンク</h3>
+<ul style="line-height:2.2;padding-left:20px;">
+  <li>① 起動方法・使い方・HTML/CSSの編集方法：<a href="https://willcloud.jp/knowhow/dev-tools-01/" target="_blank" style="color:var(--accent);">https://willcloud.jp/knowhow/dev-tools-01/</a></li>
+  <li>② JavaScriptのデバッグ方法：<a href="https://qiita.com/Hamoto/items/703b5e4a5c9aff891a26" target="_blank" style="color:var(--accent);">https://qiita.com/Hamoto/items/703b5e4a5c9aff891a26</a></li>
+</ul>`
+      },
+    ]
+  },
+  git: {
+    label: 'Git',
+    icon: '🌿',
+    color: '#f05133',
+    chapters: [
+      {
+        title: '1. Gitとは・バージョン管理の基本',
+        content: `
+<h3>バージョン管理とは</h3>
+<p>ファイルの<strong>変更履歴を記録・管理する仕組み</strong>です。「いつ・誰が・何を変えたか」を追跡でき、過去のバージョンにいつでも戻れます。</p>
+
+<div class="learn-point">
+  <strong>バージョン管理がないと…</strong><br>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;">
+    <div style="background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:8px;padding:12px 16px;flex:1;min-width:200px;">
+      <div style="color:#ff4d6d;font-weight:bold;margin-bottom:8px;">❌ 管理なし</div>
+      <div style="font-size:13px;line-height:1.9;">
+        report.docx<br>
+        report_最終.docx<br>
+        report_最終2.docx<br>
+        report_最終_本当.docx<br>
+        report_提出用.docx<br>
+        <span style="color:rgba(238,244,255,.5);font-size:12px;">→ どれが最新か分からない…</span>
+      </div>
+    </div>
+    <div style="background:rgba(0,240,160,.08);border:1px solid rgba(0,240,160,.3);border-radius:8px;padding:12px 16px;flex:1;min-width:200px;">
+      <div style="color:#00f0a0;font-weight:bold;margin-bottom:8px;">✅ Gitで管理</div>
+      <div style="font-size:13px;line-height:1.9;">
+        report.docx (1ファイルのみ)<br>
+        <span style="color:rgba(0,240,160,.7);">■ commit: 初稿作成</span><br>
+        <span style="color:rgba(0,240,160,.7);">■ commit: 第2章を追加</span><br>
+        <span style="color:rgba(0,240,160,.7);">■ commit: 誤字修正</span><br>
+        <span style="color:rgba(0,240,160,.7);">■ commit: 提出版に更新</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Gitとは</h3>
+<p><strong>Git</strong>はプログラムのソースコードを管理するための<strong>分散型バージョン管理システム</strong>です。2005年にLinuxカーネルの開発のために作られ、現在は世界中の開発現場で使われています。</p>
+
+<h3>ローカルとリモートの関係</h3>
+<p>Gitには2つの場所があります。<strong>ローカルリポジトリ</strong>（自分のPC）と<strong>リモートリポジトリ</strong>（サーバー上）です。</p>
+
+<div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:16px 0;">
+  <div style="background:rgba(240,81,51,.12);border:2px solid rgba(240,81,51,.4);border-radius:10px;padding:16px 24px;text-align:center;min-width:160px;">
+    <div style="font-size:28px;margin-bottom:6px;">💻</div>
+    <div style="font-weight:bold;color:#f05133;margin-bottom:4px;">ローカルリポジトリ</div>
+    <div style="font-size:12px;color:var(--muted);">自分のPC上</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px;">自由に変更・コミット可</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 16px;">
+    <div style="display:flex;align-items:center;gap:6px;color:#00f0a0;font-size:12px;font-weight:bold;">
+      <span>push →</span>
+    </div>
+    <div style="width:60px;height:2px;background:rgba(0,240,160,.4);"></div>
+    <div style="display:flex;align-items:center;gap:6px;color:var(--accent);font-size:12px;font-weight:bold;">
+      <span>← pull</span>
+    </div>
+  </div>
+  <div style="background:rgba(0,212,255,.1);border:2px solid rgba(0,212,255,.4);border-radius:10px;padding:16px 24px;text-align:center;min-width:160px;">
+    <div style="font-size:28px;margin-bottom:6px;">☁️</div>
+    <div style="font-weight:bold;color:var(--accent);margin-bottom:4px;">リモートリポジトリ</div>
+    <div style="font-size:12px;color:var(--muted);">GitHub などのサーバー上</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px;">チームで共有</div>
+  </div>
+</div>
+
+<div class="learn-point">
+  <strong>Gitの3大メリット</strong><br>
+  <strong>① 履歴管理</strong>：いつでも過去の状態に戻せる（ミスしても安心）<br>
+  <strong>② 並行開発</strong>：ブランチ機能で複数の変更を同時に進められる<br>
+  <strong>③ チーム共有</strong>：GitHubなどを使って変更内容をチームと共有できる
+</div>`
+      },
+      {
+        title: '2. 基本操作（ローカル）',
+        content: `
+<h3>Gitの3つの領域</h3>
+<p>Gitはファイルを3つの領域で管理します。変更は<strong>ワーキングツリー → ステージング → リポジトリ</strong>の順に進みます。</p>
+
+<div style="border:2px dashed rgba(240,81,51,.5);border-radius:14px;padding:14px 16px 16px;margin:16px 0;position:relative;">
+  <div style="position:absolute;top:-11px;left:16px;background:var(--surface2);padding:0 10px;font-size:12px;font-weight:bold;color:#f05133;">💻 自分のPC（ローカル）</div>
+  <div style="display:flex;align-items:stretch;gap:0;flex-wrap:wrap;">
+    <div style="background:rgba(255,170,0,.1);border:2px solid rgba(255,170,0,.4);border-radius:10px 0 0 10px;padding:16px 20px;text-align:center;flex:1;min-width:120px;">
+      <div style="font-size:22px;margin-bottom:6px;">📝</div>
+      <div style="font-weight:bold;color:#ffaa00;margin-bottom:4px;">ワーキングツリー</div>
+      <div style="font-size:12px;color:var(--muted);">実際に編集している<br>ファイルの場所</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;">
+      <div style="font-size:12px;color:#00f0a0;font-weight:bold;white-space:nowrap;">git add</div>
+      <div style="font-size:18px;color:#00f0a0;">→</div>
+    </div>
+    <div style="background:rgba(0,200,240,.1);border:2px solid rgba(0,200,240,.4);padding:16px 20px;text-align:center;flex:1;min-width:120px;">
+      <div style="font-size:22px;margin-bottom:6px;">📦</div>
+      <div style="font-weight:bold;color:#00c8f0;margin-bottom:4px;">ステージングエリア</div>
+      <div style="font-size:12px;color:var(--muted);">コミットする変更を<br>一時的に置く場所</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;">
+      <div style="font-size:12px;color:#00f0a0;font-weight:bold;white-space:nowrap;">git commit</div>
+      <div style="font-size:18px;color:#00f0a0;">→</div>
+    </div>
+    <div style="background:rgba(192,132,252,.1);border:2px solid rgba(192,132,252,.4);border-radius:0 10px 10px 0;padding:16px 20px;text-align:center;flex:1;min-width:120px;">
+      <div style="font-size:22px;margin-bottom:6px;">🗂️</div>
+      <div style="font-weight:bold;color:#c084fc;margin-bottom:4px;">ローカルリポジトリ</div>
+      <div style="font-size:12px;color:var(--muted);">履歴として記録<br>された変更の保管庫</div>
+    </div>
+  </div>
+</div>
+
+<h3>基本コマンド</h3>
+<pre><code># リポジトリを新規作成
+git init
+
+# 現在の状態を確認（変更されたファイルを一覧表示）
+git status
+
+# ファイルをステージングに追加
+git add ファイル名       # 特定のファイル
+git add .               # すべての変更ファイル
+
+# ステージングの内容をコミット（履歴に記録）
+git commit -m "変更内容のメモ"
+
+# コミット履歴を確認
+git log
+git log --oneline       # 1行で簡潔に表示</code></pre>
+
+<h3>コミットとは</h3>
+<p><strong>コミット</strong>はGitにおける「セーブポイント」です。1つのコミットには<strong>変更内容・日時・作者・コミットメッセージ</strong>が記録されます。</p>
+
+<div class="learn-point">
+  <strong>良いコミットメッセージの書き方</strong><br>
+  <strong>悪い例</strong>：<code>"修正"</code>　<code>"update"</code>　<code>"asdf"</code><br>
+  <strong>良い例</strong>：<code>"ログイン画面のバリデーションを追加"</code>　<code>"商品一覧APIのレスポンス形式を修正"</code><br><br>
+  「何を変えたか」より「なぜ変えたか・何のために変えたか」が伝わるメッセージを書くことで、後で履歴を見たときに意図が分かります。
+</div>
+
+<h3>git status の見方</h3>
+<pre><code>$ git status
+On branch main
+
+Changes to be committed:      ← ステージング済み（commit 待ち）
+  modified:   index.html
+
+Changes not staged for commit: ← ワーキングツリーにある未ステージの変更
+  modified:   style.css
+
+Untracked files:               ← Gitが追跡していない新規ファイル
+  new_page.html</code></pre>`
+      },
+      {
+        title: '3. ブランチ',
+        content: `
+<h3>ブランチとは</h3>
+<p><strong>ブランチ</strong>とは、開発の「分岐点」です。本流（mainブランチ）から枝分かれして作業することで、本番に影響を与えずに新機能開発やバグ修正ができます。</p>
+
+<div style="margin:16px 0;font-family:var(--mono);font-size:13px;line-height:2;">
+  <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
+    <div style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);border-radius:6px;padding:6px 14px;color:var(--accent);font-weight:bold;">main</div>
+    <div style="color:var(--muted);padding:0 6px;">──●──●──●──────────●──●</div>
+    <div style="color:var(--muted);font-size:11px;">（本番・安定版）</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;padding-left:120px;margin-top:-8px;">
+    <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:0 4px;">
+      <span style="font-size:10px;color:#00f0a0;white-space:nowrap;">分岐</span>
+      <span style="color:#00f0a0;">↘</span>
+    </div>
+    <div style="color:var(--muted);padding:0 4px;">──●──●──●</div>
+    <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:0 4px;">
+      <span style="font-size:10px;color:#00f0a0;white-space:nowrap;">マージ</span>
+      <span style="color:#00f0a0;">↗</span>
+    </div>
+    <div style="background:rgba(0,240,160,.15);border:1px solid rgba(0,240,160,.4);border-radius:6px;padding:4px 12px;color:#00f0a0;font-weight:bold;font-size:12px;margin-left:8px;">feature/login</div>
+    <div style="color:var(--muted);font-size:11px;padding-left:8px;">（新機能開発用ブランチ）</div>
+  </div>
+</div>
+
+<h3>なぜブランチを使うのか</h3>
+<p>mainブランチに直接コミットし続けると、作業中の未完成コードが本番コードに混入するリスクがあります。ブランチを使うことで、作業内容を安全に分離し、完成してからmainに取り込むことができます。</p>
+<div class="learn-point">
+  <strong>ブランチを使う主なメリット</strong>
+  <ul style="margin:8px 0 0;padding-left:20px;line-height:2;">
+    <li>本番（main）に影響を与えずに新機能の開発やバグ修正ができる</li>
+    <li>作業が完成してからmainに取り込む（マージ）ので品質を保てる</li>
+    <li>不要になったブランチは削除でき、履歴をきれいに保てる</li>
+  </ul>
+</div>
+
+<h3>ローカルでの作業フロー</h3>
+<div style="margin:16px 0;display:flex;flex-direction:column;gap:10px;">
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px 20px;display:flex;align-items:flex-start;gap:14px;">
+    <div style="background:#f05133;color:#fff;font-weight:bold;font-size:13px;border-radius:6px;padding:2px 10px;white-space:nowrap;margin-top:1px;">STEP 1</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px;">mainブランチから作業ブランチを作成</div>
+      <code style="font-size:12px;color:var(--muted);">git checkout -b feature/login</code>
+    </div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:18px;">↓</div>
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px 20px;display:flex;align-items:flex-start;gap:14px;">
+    <div style="background:#f05133;color:#fff;font-weight:bold;font-size:13px;border-radius:6px;padding:2px 10px;white-space:nowrap;margin-top:1px;">STEP 2</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px;">作業ブランチでコーディング・コミットを繰り返す</div>
+      <code style="font-size:12px;color:var(--muted);">git add . → git commit -m "..."</code>
+    </div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:18px;">↓</div>
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px 20px;display:flex;align-items:flex-start;gap:14px;">
+    <div style="background:#f05133;color:#fff;font-weight:bold;font-size:13px;border-radius:6px;padding:2px 10px;white-space:nowrap;margin-top:1px;">STEP 3</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px;">mainブランチに切り替える</div>
+      <code style="font-size:12px;color:var(--muted);">git checkout main</code>
+    </div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:18px;">↓</div>
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px 20px;display:flex;align-items:flex-start;gap:14px;">
+    <div style="background:#f05133;color:#fff;font-weight:bold;font-size:13px;border-radius:6px;padding:2px 10px;white-space:nowrap;margin-top:1px;">STEP 4</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px;">作業ブランチをmainへマージ</div>
+      <code style="font-size:12px;color:var(--muted);">git merge feature/login</code>
+    </div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:18px;">↓</div>
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px 20px;display:flex;align-items:flex-start;gap:14px;">
+    <div style="background:#f05133;color:#fff;font-weight:bold;font-size:13px;border-radius:6px;padding:2px 10px;white-space:nowrap;margin-top:1px;">STEP 5</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px;">不要になった作業ブランチを削除</div>
+      <code style="font-size:12px;color:var(--muted);">git branch -d feature/login</code>
+    </div>
+  </div>
+</div>
+<div style="background:rgba(240,81,51,.08);border-left:4px solid #f05133;border-radius:6px;padding:12px 16px;margin:12px 0 16px;">
+  <strong>※ 注意</strong>：このフローはローカル内での作業ブランチの使い方です。リモートリポジトリ（GitHub）とのやり取りをmainブランチのみで行う例となります。
+</div>
+
+<h3>ブランチのコマンド</h3>
+<pre><code># ブランチの一覧を表示（* が現在のブランチ）
+git branch
+
+# 新しいブランチを作成
+git branch feature/login
+
+# ブランチを切り替える
+git checkout feature/login
+
+# 作成と切り替えを同時に行う（よく使う！）
+git checkout -b feature/new-function
+
+# ブランチをマージ（統合）する
+# ※ 取り込み先のブランチに切り替えてから実行
+git checkout main
+git merge feature/login
+
+# ブランチを削除する
+git branch -d feature/login</code></pre>
+`
+      },
+      {
+        title: '4. リモートリポジトリ（GitHub）',
+        content: `
+<h3>GitHubとは</h3>
+<p><strong>GitHub</strong>はGitのリモートリポジトリをホスティングするサービスです。コードの共有・チームでの共同開発・コードレビューなどの機能を提供します。</p>
+
+<h3>リモートの基本操作</h3>
+<div style="display:flex;align-items:center;justify-content:center;gap:0;flex-direction:column;margin:16px 0;">
+  <div style="display:flex;align-items:center;gap:0;width:100%;justify-content:center;flex-wrap:wrap;gap:12px;">
+    <div style="background:rgba(240,81,51,.12);border:2px solid rgba(240,81,51,.4);border-radius:10px;padding:14px 20px;text-align:center;min-width:140px;">
+      <div style="font-size:24px;margin-bottom:4px;">💻</div>
+      <div style="font-weight:bold;color:#f05133;font-size:14px;">ローカル</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="color:#c084fc;font-size:18px;">←</span>
+        <span style="color:#c084fc;font-size:12px;font-weight:bold;font-family:var(--mono);">git clone</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="color:var(--accent);font-size:18px;">←</span>
+        <span style="color:var(--accent);font-size:12px;font-weight:bold;font-family:var(--mono);">git pull</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="color:#00f0a0;font-size:12px;font-weight:bold;font-family:var(--mono);">git push</span>
+        <span style="color:#00f0a0;font-size:18px;">→</span>
+      </div>
+    </div>
+    <div style="background:rgba(0,212,255,.1);border:2px solid rgba(0,212,255,.4);border-radius:10px;padding:14px 20px;text-align:center;min-width:140px;">
+      <div style="font-size:24px;margin-bottom:4px;">☁️</div>
+      <div style="font-weight:bold;color:var(--accent);font-size:14px;">GitHub</div>
+    </div>
+  </div>
+</div>
+
+<pre><code># リモートリポジトリをまるごと複製（初回セットアップ時１回のみ実行）
+git clone https://github.com/ユーザー名/リポジトリ名.git
+
+# リモートの変更を取得して手元に反映
+git pull
+
+# 現在のブランチをリモートに送信（初回）
+git push -u origin main
+
+# 以降は短縮形で OK
+git push</code></pre>
+
+<h3>push と pull の使い分け</h3>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(240,81,51,.1);">
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(240,81,51,.25);">コマンド</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(240,81,51,.25);">方向</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(240,81,51,.25);">使うタイミング</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git clone</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">GitHub → ローカル（新規）</td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">リポジトリを初めて手元に複製するとき</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git pull</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">GitHub → ローカル</td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">チームの変更を取り込みたいとき</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git push</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">ローカル → GitHub</td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">自分の変更を共有したいとき</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="learn-point">
+  <strong>pushの前にpullする習慣を</strong><br>
+  チームで開発する場合、自分が作業中にチームメンバーがリモートに変更を push している可能性があります。<br>
+  push する前に <code>git pull</code> で最新状態を取り込んでから push するのが基本マナーです。<br>
+  → push が失敗した場合は「先に pull して、コンフリクトを解消してから再push」の手順で対応します。
+</div>
+
+<h3>コンフリクト（衝突）</h3>
+<p>チームで開発していると、複数人が同じファイルをそれぞれのブランチで変更することがあります。</p>
+
+<!-- ─●─ 図 -->
+<div style="margin:28px 0 16px;font-family:var(--mono);font-size:13px;line-height:2.2;overflow-x:auto;">
+
+  <!-- Aさんのローカルリポジトリ -->
+  <div style="border:2px dashed rgba(0,200,240,.4);border-radius:10px;padding:18px 16px 18px;margin-top:14px;position:relative;">
+    <div style="position:absolute;top:-11px;left:14px;background:var(--surface2);padding:0 8px;font-size:11px;font-weight:bold;color:#00c8f0;">💻 Aさんのローカルリポジトリ</div>
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:5px;margin-right:4px;">
+        <span style="background:#00c8f0;color:#000;font-weight:bold;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">A</span>
+        <span style="color:#00c8f0;font-size:12px;">feature/login</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:0 2px;">
+        <span style="font-size:10px;color:#00c8f0;">分岐</span>
+        <span style="color:#00c8f0;">↗</span>
+      </div>
+      <div style="color:var(--muted);">─●─●─●</div>
+      <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:0 2px;">
+        <span style="font-size:10px;color:#00c8f0;">マージ</span>
+        <span style="color:#00c8f0;">↘</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0;">
+      <div style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);border-radius:5px;padding:3px 10px;color:var(--accent);font-weight:bold;font-size:12px;white-space:nowrap;">main</div>
+      <div style="color:var(--muted);padding:0 4px;">─●───●────────●───</div>
+    </div>
+  </div>
+
+  <!-- push A → GitHub -->
+  <div style="width:360px;line-height:1.6;margin:16px 0;text-align:right;">
+    <span style="color:#00f0a0;font-size:16px;font-weight:bold;">↓ git push </span>
+  </div>
+
+  <!-- リモートリポジトリ -->
+  <div style="border:2px dashed rgba(192,132,252,.4);border-radius:10px;padding:18px 16px 18px;margin-top:14px;position:relative;">
+    <div style="position:absolute;top:-11px;left:14px;background:var(--surface2);padding:0 8px;font-size:11px;font-weight:bold;color:#c084fc;">☁️ リモートリポジトリ（GitHub）</div>
+    <div style="display:flex;align-items:center;gap:0;">
+      <div style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);border-radius:5px;padding:3px 10px;color:var(--accent);font-weight:bold;font-size:12px;white-space:nowrap;">main</div>
+      <div style="color:var(--muted);padding:0 4px;">─●─●───────●───●──</div>
+      <div style="font-size:11px;color:var(--muted);white-space:nowrap;">← Aの変更反映済み</div>
+    </div>
+  </div>
+
+  <!-- push B rejected + pull -->
+  <div style="text-align:right;width:480px;line-height:1.6;margin:0;">
+    <div style="color:#ff4d6d;font-size:16px;font-weight:bold;white-space:nowrap;">↑ git push → ✗ 拒否</div>
+    <div style="color:var(--accent);font-size:16px;font-weight:bold;">git pull ↓</div>
+  </div>
+
+  <!-- Bさんのローカルリポジトリ -->
+  <div style="border:2px dashed rgba(0,240,160,.4);border-radius:10px;padding:18px 16px 18px;margin-top:14px;position:relative;">
+    <div style="position:absolute;top:-11px;left:14px;background:var(--surface2);padding:0 8px;font-size:11px;font-weight:bold;color:#00f0a0;">💻 Bさんのローカルリポジトリ</div>
+    <div style="display:flex;align-items:center;gap:0;">
+      <div style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);border-radius:5px;padding:3px 10px;color:var(--accent);font-weight:bold;font-size:12px;white-space:nowrap;">main</div>
+      <div style="color:var(--muted);padding:0 4px;">─●───●───────────●────&nbsp;&nbsp;&nbsp;&nbsp;</div>
+      <div style="background:rgba(255,77,109,.15);border:1px solid rgba(255,77,109,.4);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:bold;color:#ff4d6d;white-space:nowrap;">⚠️ コンフリクト発生！</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:5px;margin-right:4px;">
+        <span style="background:#00f0a0;color:#000;font-weight:bold;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">B</span>
+        <span style="color:#00f0a0;font-size:12px;">feature/signup</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:0 2px;">
+        <span style="color:#00f0a0;">↘</span>
+        <span style="font-size:10px;color:#00f0a0;">分岐</span>
+      </div>
+      <div style="color:var(--muted);">─●─●─●─●</div>
+      <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:0 2px;">
+        <span style="color:#00f0a0;">↗</span>
+        <span style="font-size:10px;color:#00f0a0;">マージ</span>
+      </div>
+    </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ステップ図 -->
+<div style="margin:16px 0;font-size:13px;background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+
+  <!-- STEP 1 -->
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+    <div style="background:#445566;color:#eef4ff;font-weight:bold;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;">STEP 1</div>
+    <div style="flex:1;">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:6px;">それぞれが GitHub からクローン・作業ブランチを作成し、同じファイルを編集</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div style="background:rgba(0,200,240,.08);border:1px solid rgba(0,200,240,.3);border-radius:8px;padding:10px 14px;flex:1;min-width:150px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">
+            <span style="background:#00c8f0;color:#000;font-weight:bold;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">A</span>
+            <span style="color:#00c8f0;font-size:12px;font-weight:bold;">Aさんのローカル</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);">ブランチ: feature/login</div>
+          <div style="font-family:var(--mono);font-size:11px;color:#00c8f0;margin-top:4px;">app.js 10行目を編集</div>
+          <div style="font-family:var(--mono);font-size:11px;color:rgba(0,200,240,.6);">console.log("Aさんの変更");</div>
+        </div>
+        <div style="background:rgba(0,240,160,.08);border:1px solid rgba(0,240,160,.3);border-radius:8px;padding:10px 14px;flex:1;min-width:150px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">
+            <span style="background:#00f0a0;color:#000;font-weight:bold;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">B</span>
+            <span style="color:#00f0a0;font-size:12px;font-weight:bold;">Bさんのローカル</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);">ブランチ: feature/signup</div>
+          <div style="font-family:var(--mono);font-size:11px;color:#00f0a0;margin-top:4px;">app.js 10行目を編集</div>
+          <div style="font-family:var(--mono);font-size:11px;color:rgba(0,240,160,.6);">console.log("Bさんの変更");</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+    <div style="background:#445566;color:#eef4ff;font-weight:bold;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;">STEP 2</div>
+    <div style="flex:1;">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:6px;">Aさんが先にローカルの main にマージして GitHub に push</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div style="background:rgba(0,200,240,.08);border:1px solid rgba(0,200,240,.3);border-radius:6px;padding:6px 12px;font-size:12px;color:#00c8f0;">💻 Aさんのローカル main</div>
+        <div style="color:#00f0a0;font-size:12px;font-weight:bold;font-family:var(--mono);">git push →</div>
+        <div style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--accent);">☁️ GitHub main（Aさんの変更が反映）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+    <div style="background:#445566;color:#eef4ff;font-weight:bold;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;">STEP 3</div>
+    <div style="flex:1;">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:6px;">Bさんがローカルのmainにマージ後、GitHubにpushしようとすると拒否される</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div style="background:rgba(0,240,160,.08);border:1px solid rgba(0,240,160,.3);border-radius:6px;padding:6px 12px;font-size:12px;color:#00f0a0;">💻 Bさんのローカル main</div>
+        <div style="color:#ff4d6d;font-size:12px;font-weight:bold;font-family:var(--mono);">git push → ✗</div>
+        <div style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--accent);">☁️ GitHub（Aの変更あり）</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">→ 「先にpullしてください」と拒否される</div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <div style="background:#445566;color:#eef4ff;font-weight:bold;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;">STEP 4</div>
+    <div style="flex:1;">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:6px;">Bさんが git pull すると、Aさんの変更と衝突しコンフリクト発生</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <div style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--accent);">☁️ GitHub main（Aさんの変更あり）</div>
+        <div style="color:var(--accent);font-size:12px;font-weight:bold;font-family:var(--mono);">← git pull</div>
+        <div style="background:rgba(0,240,160,.08);border:1px solid rgba(0,240,160,.3);border-radius:6px;padding:6px 12px;font-size:12px;color:#00f0a0;">💻 Bさんのローカル main</div>
+      </div>
+      <div style="background:rgba(255,77,109,.1);border:2px solid rgba(255,77,109,.4);border-radius:8px;padding:10px 16px;text-align:center;">
+        <div style="font-size:18px;margin-bottom:4px;">⚠️</div>
+        <div style="font-weight:bold;color:#ff4d6d;font-size:14px;">コンフリクト発生！</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">同じファイルの同じ行がどちらにも変更されているため、<br>Git はどちらを正とすべきか判断できない</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p>このように、<strong>複数人が同じファイルの同じ行をそれぞれのブランチで変更し、先にpushされた変更をpullすると、マージ処理が走りコンフリクト（衝突）が発生します。</strong></p>
+
+<div style="background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.3);border-radius:8px;padding:14px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;">
+  <div style="color:#ff4d6d;font-weight:bold;margin-bottom:8px;">コンフリクトが発生したファイルの中身</div>
+  <div style="color:#eef4ff;">
+    &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD<br>
+    <span style="color:#00c8f0;">console.log("mainブランチの変更");</span><br>
+    =======<br>
+    <span style="color:#00f0a0;">console.log("featureブランチの変更");</span><br>
+    &gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/login
+  </div>
+</div>
+
+<div class="learn-point">
+  <strong>コンフリクトの解消手順</strong><br>
+  ① <code>&lt;&lt;&lt;&lt;&lt;</code>〜<code>&gt;&gt;&gt;&gt;&gt;</code> のマーカーが入ったファイルを開く<br>
+  ② 残すべき内容を選んで、マーカー行（<code>&lt;&lt;&lt;&lt;&lt;</code>・<code>=======</code>・<code>&gt;&gt;&gt;&gt;&gt;</code>）を削除する<br>
+  ③ <code>git add</code> でステージングして <code>git commit</code> する<br><br>
+  VSCodeなどのエディタはコンフリクト箇所を色付きで表示し、ボタン一つで「どちらを採用するか」選べます。
+</div>`
+      },
+      {
+        title: '5. チーム開発の流れ',
+        content: `
+<h3>チーム開発の基本フロー</h3>
+<p>小規模開発では、mainから直接作業ブランチを作成してローカルで開発するシンプルなフローが一般的です。<strong>プルリクエスト（PR）</strong>やレビューを経てmainにマージすること自体は、規模に関わらず広く行われます。</p>
+
+<div style="margin:16px 0;display:flex;flex-direction:column;gap:12px;">
+  <div style="border:2px dashed rgba(240,81,51,.4);border-radius:12px;padding:14px 16px 6px;position:relative;">
+    <div style="position:absolute;top:-11px;left:16px;background:var(--surface2);padding:0 10px;font-size:12px;font-weight:bold;color:#f05133;">💻 ローカル</div>
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+          <div style="background:#f05133;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">1</div>
+          <div style="width:2px;background:rgba(240,81,51,.3);flex:1;min-height:20px;"></div>
+        </div>
+        <div style="padding:4px 0 16px 12px;">
+          <div style="font-weight:bold;color:#f05133;margin-bottom:2px;">mainから作業ブランチを作成</div>
+          <code style="font-size:12px;color:var(--muted);">git checkout -b feature/機能名</code>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+          <div style="background:#ffaa00;color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">2</div>
+          <div style="width:2px;background:rgba(255,170,0,.3);flex:1;min-height:20px;"></div>
+        </div>
+        <div style="padding:4px 0 16px 12px;">
+          <div style="font-weight:bold;color:#ffaa00;margin-bottom:2px;">作業ブランチで開発・コミット</div>
+          <code style="font-size:12px;color:var(--muted);">git add . &amp;&amp; git commit -m "機能を追加"</code>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+          <div style="background:#00f0a0;color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">3</div>
+        </div>
+        <div style="padding:4px 0 8px 12px;">
+          <div style="font-weight:bold;color:#00f0a0;margin-bottom:2px;">GitHubに作業ブランチをpush</div>
+          <code style="font-size:12px;color:var(--muted);">git push -u origin feature/機能名</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:var(--muted);font-size:18px;">↓</div>
+
+  <div style="border:2px dashed rgba(0,212,255,.4);border-radius:12px;padding:14px 16px 6px;position:relative;">
+    <div style="position:absolute;top:-11px;left:16px;background:var(--surface2);padding:0 10px;font-size:12px;font-weight:bold;color:var(--accent);">🌐 GitHub上</div>
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+          <div style="background:var(--accent);color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">4</div>
+          <div style="width:2px;background:rgba(0,212,255,.3);flex:1;min-height:20px;"></div>
+        </div>
+        <div style="padding:4px 0 16px 12px;">
+          <div style="font-weight:bold;color:var(--accent);margin-bottom:2px;">GitHubでプルリクエスト（PR）を作成</div>
+          <div style="font-size:13px;color:var(--muted);">「この変更をmainに取り込んでください」という申請をGitHub上で行う</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+          <div style="background:#c084fc;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">5</div>
+          <div style="width:2px;background:rgba(192,132,252,.3);flex:1;min-height:20px;"></div>
+        </div>
+        <div style="padding:4px 0 16px 12px;">
+          <div style="font-weight:bold;color:#c084fc;margin-bottom:2px;">チームメンバーがコードレビュー</div>
+          <div style="font-size:13px;color:var(--muted);">GitHub上でコメント・指摘。修正が必要なら2〜4を繰り返す</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+          <div style="background:#00f0a0;color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;">6</div>
+        </div>
+        <div style="padding:4px 0 8px 12px;">
+          <div style="font-weight:bold;color:#00f0a0;margin-bottom:2px;">承認されたらmainにマージ</div>
+          <div style="font-size:13px;color:var(--muted);">承認後、担当者または管理者がGitHub上の「Merge pull request」ボタンを押す。ブランチはその後削除する</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="learn-point">
+  <strong>なぜ作業ブランチをリモートリポジトリへpushするのか</strong>
+  <p style="margin:8px 0 4px;">ローカルだけで作業する場合はmainをそのままpushすれば十分ですが、チーム開発では作業ブランチをpushすることで以下のメリットがあります。</p>
+  <ul style="margin:4px 0 0;padding-left:20px;line-height:2;">
+    <li>コードレビューができる（マージ前にチームが確認・コメント）</li>
+    <li>mainブランチの品質を保てる（レビュー通過後のみ取り込み）</li>
+    <li>変更の目的が明確になる（1ブランチ＝1PRで追跡しやすい）</li>
+  </ul>
+</div>
+
+<h3>プルリクエスト（PR）とは</h3>
+<p>自分のブランチの変更を<strong>別ブランチ（mainなど）に取り込んでほしいとリクエスト</strong>する機能です。GitHubのPR機能では、変更内容を差分で確認したり、コメントを書いたりできます。</p>
+
+<div class="learn-point">
+  <strong>レビューを通すコツ</strong><br>
+  ① <strong>PRは小さく</strong>：変更が大きすぎるとレビューが大変。1機能1PRを心がける<br>
+  ② <strong>説明を書く</strong>：「何を・なぜ変えたか」をPRの説明欄に記載する<br>
+  ③ <strong>セルフレビュー</strong>：PRを出す前に自分でもう一度コードを見直す<br>
+  ④ <strong>コメントには丁寧に</strong>：指摘はコードに対するものであり、人への批判ではない
+</div>
+
+<h3>ブランチ戦略</h3>
+<p>チームや規模によって、ブランチの使い方には複数のパターンがあります。</p>
+
+<div style="margin:16px 0;display:flex;flex-direction:column;gap:12px;">
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+    <div style="font-weight:bold;font-size:15px;margin-bottom:8px;color:#f05133;">GitHub Flow（シンプル・小〜中規模向け）</div>
+    <p style="margin:0 0 10px;">本章で紹介したフローです。<code>main</code> から作業ブランチを作り、PRを経てmainにマージします。シンプルで管理しやすく、少人数チームに向いています。</p>
+    <div style="font-family:var(--mono);font-size:12px;line-height:2;">
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin-bottom:2px;">【ローカル】</div>
+      <div style="color:var(--muted);">main → feature/xxx → git add／git commit → git push</div>
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin:6px 0 2px;">【リモート（GitHub）】</div>
+      <div style="color:var(--muted);">PR作成 → レビュー → mainにマージ</div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+    <div style="font-weight:bold;font-size:15px;margin-bottom:8px;color:#f05133;">サブブランチ（中規模向け・機能の分担）</div>
+    <p style="margin:0 0 10px;">大きな機能を複数人で分担するとき、featureブランチをさらに分岐してそれぞれが担当します。各自の作業が終わったらfeatureブランチにマージし、最終的にmainへPRを出します。</p>
+    <div style="font-family:var(--mono);font-size:12px;line-height:2;">
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin-bottom:2px;">【GitHub 初期状態】</div>
+      <div style="color:var(--muted);margin-bottom:6px;">main、feature/payment が存在</div>
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin-bottom:2px;">【ローカル】</div>
+      <div style="color:var(--muted);">
+        ① git pull で feature/payment を取得<br>
+        ② feature/payment からサブブランチを作成<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;feature/payment-ui（Aさん）／feature/payment-api（Bさん）<br>
+        ③ 開発・コミット（git add／git commit）<br>
+        ④ GitHubへpush（git push origin feature/payment-ui）
+      </div>
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin:6px 0 2px;">【GitHub】</div>
+      <div style="color:var(--muted);">
+        ⑤ feature/payment-ui → feature/payment へPR・レビュー・マージ<br>
+        ⑥ 全員分完了後、feature/payment → main へPR・レビュー・<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;承認後、担当者または管理者がマージ
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+    <div style="font-weight:bold;font-size:15px;margin-bottom:8px;color:#f05133;">Git Flow（体系的・大規模向け）</div>
+    <p style="margin:0 0 6px;"><code>main</code>（本番）と <code>develop</code>（開発統合）の2本柱を持つ手法です。featureブランチは <code>main</code> ではなく <code>develop</code> から作成し、リリース時に <code>main</code> へマージします。ルールが多い分、大人数・長期プロジェクトに向いています。</p>
+    <div style="margin:0 0 10px;padding:10px 14px;background:rgba(240,81,51,.08);border-left:3px solid rgba(240,81,51,.4);border-radius:4px;font-size:12px;line-height:1.9;">
+      <strong>developブランチを持つメリット</strong><br>
+      ・mainブランチを常にリリース可能な状態に保てる<br>
+      ・複数のfeatureを統合してまとめてテストできる<br>
+      ・リリースのタイミングをコントロールできる（developが安定したらmainへ）<br>
+      ・緊急修正（hotfix）はmainに直接当てつつ、developにも反映できる
+    </div>
+    <div style="font-family:var(--mono);font-size:12px;line-height:2;">
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin-bottom:2px;">【GitHub 初期状態】</div>
+      <div style="color:var(--muted);margin-bottom:6px;">main、develop が存在</div>
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin-bottom:2px;">【ローカル】</div>
+      <div style="color:var(--muted);">
+        ① git pull で develop を取得<br>
+        ② develop からfeatureブランチを作成<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;git checkout -b feature/xxx<br>
+        ③ 開発・コミット（git add／git commit）<br>
+        ④ GitHubへpush（git push origin feature/xxx）
+      </div>
+      <div style="color:#00d4ff;font-size:11px;font-weight:bold;margin:6px 0 2px;">【GitHub】</div>
+      <div style="color:var(--muted);">
+        ⑤ feature/xxx → develop へPR・レビュー・マージ<br>
+        ⑥ リリース時、develop → main へPR・レビュー・<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;承認後、担当者または管理者がマージ
+      </div>
+    </div>
+  </div>
+</div>`
+      },
+      {
+        title: '6. よく使うコマンド・トラブル対処',
+        content: `
+<h3>よく使うコマンド一覧</h3>
+<table style="width:100%;border-collapse:collapse;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(240,81,51,.12);">
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(240,81,51,.25);">コマンド</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(240,81,51,.25);">説明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git init</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">リポジトリを新規作成する</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git clone URL</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">リモートリポジトリを複製する</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git status</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">変更の状態を確認する</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git add .</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">すべての変更をステージングする</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git commit -m "メッセージ"</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">コミット（履歴に記録）する</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git log --oneline</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">コミット履歴を1行表示で確認する</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git branch</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">ブランチ一覧を確認する</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git checkout -b ブランチ名</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">ブランチを作成して切り替える</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git merge ブランチ名</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">ブランチをマージ（統合）する</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git push</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">ローカルの変更をリモートに送る</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git pull</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">リモートの変更をローカルに取り込む</td>
+    </tr>
+    <tr style="background:rgba(240,81,51,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git diff</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">変更内容を差分表示する</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);"><code>git stash</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(240,81,51,.2);">作業中の変更を一時退避する</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>トラブル対処：stash / reset / revert</h3>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">
+  <thead>
+    <tr style="background:rgba(192,132,252,.12);">
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(192,132,252,.25);">コマンド</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(192,132,252,.25);">用途</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid rgba(192,132,252,.25);">履歴への影響</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);"><code>git stash</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);">作業中の変更を一時退避（後で戻せる）</td>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);">なし</td>
+    </tr>
+    <tr style="background:rgba(192,132,252,.04);">
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);"><code>git reset</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);">コミット前の変更を取り消す（ステージング解除など）</td>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);">変更あり</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);"><code>git revert</code></td>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);">過去のコミットを打ち消す新コミットを作る</td>
+      <td style="padding:8px 12px;border:1px solid rgba(192,132,252,.2);">履歴は残る（安全）</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>よくあるトラブルと対処法</h3>
+<pre><code># ① コミットメッセージを間違えた（直前のコミットのみ）
+git commit --amend -m "正しいメッセージ"
+# ※ pushしていない場合のみ使用。push済みには使わない
+
+# ② ステージングを取り消したい（ファイルを git add したが戻したい）
+git reset HEAD ファイル名
+
+# ③ ファイルの変更を元に戻したい（ワーキングツリーの変更を取り消す）
+git checkout -- ファイル名
+# ※ 保存していない変更は完全に消えるので注意！
+
+# ④ 作業中に別ブランチに移動したいとき
+git stash         # 変更を一時退避
+git checkout main # ブランチ切り替え
+git stash pop     # 退避した変更を戻す</code></pre>
+
+<div class="learn-point">
+  <strong>困ったときは git status を確認する</strong><br>
+  Git で何かおかしくなったとき、まず <code>git status</code> を実行しましょう。現在の状態（どのブランチにいるか・何が変更されているか・何がステージングされているか）が一目で分かります。<br><br>
+  また <code>git log --oneline</code> でコミット履歴を確認すると、「どこまで戻ればよいか」が判断しやすくなります。
+</div>`
+      },
     ]
   },
   html: {
@@ -4167,113 +5190,6 @@ display: none;         /* 非表示 */</code></pre>
   ④ モバイルファーストで書くと、シンプルなスタイルから始められる
 </div>`
       },
-      {
-        title: '9. 開発者ツール',
-        content: `
-<h3>開発者ツールとは</h3>
-<p>ブラウザに内蔵されているデバッグ・調査用のツールです。HTMLの構造確認・CSSの変更・JavaScriptのエラー確認など、Web開発に欠かせない機能が揃っています。</p>
-
-<h3>開き方</h3>
-<pre><code>【Windows】
-F12 キー
-または Ctrl + Shift + I
-
-【Mac】
-Cmd + Option + I
-
-【右クリックメニューから】
-ページ上で右クリック → 「検証」または「要素を検証」</code></pre>
-
-<h3>Elementsパネル（要素の検証）</h3>
-<p>HTMLの構造をツリー形式で確認・編集できます。ページ上の要素を右クリック → 「検証」で、その要素に直接ジャンプできます。</p>
-<div class="html-preview">
-  <div class="html-preview-bar">Elementsパネルでできること</div>
-  <div class="html-preview-body">
-    <ul style="margin:0;padding-left:20px;line-height:2;">
-      <li>HTMLの構造をツリー形式で確認</li>
-      <li>要素をクリックすると右側にCSSが表示される</li>
-      <li>HTMLを直接ダブルクリックして一時的に編集できる</li>
-      <li>要素にマウスを重ねるとページ上でハイライト表示される</li>
-    </ul>
-  </div>
-</div>
-
-<h3>Stylesペイン（CSSの確認・変更）</h3>
-<p>Elementsパネルで要素を選択すると、右側に適用されているCSSが一覧表示されます。</p>
-<div class="html-preview">
-  <div class="html-preview-bar">Stylesペインでできること</div>
-  <div class="html-preview-body">
-    <ul style="margin:0;padding-left:20px;line-height:2;">
-      <li>適用されているCSSプロパティを確認できる</li>
-      <li>値をクリックして一時的に変更・試行錯誤できる（保存はされない）</li>
-      <li>打ち消し線のプロパティは他のルールに上書きされているもの</li>
-      <li>どのCSSファイルの何行目に書かれているか表示される</li>
-    </ul>
-  </div>
-</div>
-
-<h3>Consoleパネル（エラーとログの確認）</h3>
-<p>JavaScriptのエラーや <code>console.log()</code> の出力を確認できます。エラーが起きた場合はまずここを確認します。</p>
-<pre><code>// JavaScript でのログ出力
-console.log("確認したい値:", value);   // 通常ログ
-console.warn("警告メッセージ");        // 黄色で表示
-console.error("エラーメッセージ");     // 赤色で表示</code></pre>
-<div class="html-preview">
-  <div class="html-preview-bar">Consoleパネルでできること</div>
-  <div class="html-preview-body">
-    <ul style="margin:0;padding-left:20px;line-height:2;">
-      <li>JavaScriptのエラーが赤字で表示される</li>
-      <li><code>console.log()</code> の出力を確認できる</li>
-      <li>直接JavaScriptを入力して実行できる</li>
-      <li>エラーをクリックするとソースの該当行に飛べる</li>
-    </ul>
-  </div>
-</div>
-
-<h3>Networkパネル（通信の確認）</h3>
-<p>ページが読み込む通信（HTMLファイル・画像・API など）を一覧で確認できます。</p>
-<div class="html-preview">
-  <div class="html-preview-bar">Networkパネルでできること</div>
-  <div class="html-preview-body">
-    <ul style="margin:0;padding-left:20px;line-height:2;">
-      <li>どのファイルを読み込んでいるか確認できる</li>
-      <li>各リクエストのステータスコード（200・404・500 など）を確認できる</li>
-      <li>APIのリクエスト内容・レスポンス内容を確認できる</li>
-      <li>読み込みに時間がかかっているファイルを特定できる</li>
-    </ul>
-  </div>
-</div>
-
-<h3>Sourcesパネル（JavaScriptのデバッグ）</h3>
-<p>JavaScriptのコードを一時停止して、変数の中身や処理の流れを1行ずつ確認できます。<code>console.log()</code> だけでは追いきれない複雑な処理のデバッグに役立ちます。</p>
-<pre><code>// デバッグの基本手順
-// ① F12 → Sources タブを開く
-// ② 左側のファイルツリーからJSファイルを選択
-// ③ 確認したい行番号をクリック → ブレークポイント（赤丸）を設置
-// ④ 処理を実行するとブレークポイントで一時停止する
-// ⑤ 右側のパネルで変数の値を確認しながら1行ずつ進める</code></pre>
-<div class="html-preview">
-  <div class="html-preview-bar">ブレークポイント停止中にできること</div>
-  <div class="html-preview-body">
-    <ul style="margin:0;padding-left:20px;line-height:2;">
-      <li><strong>変数の確認</strong>：右側の「Scope」欄で現在の変数の値を一覧表示</li>
-      <li><strong>ステップ実行</strong>：F10（1行進む）/ F11（関数の中に入る）/ F8（次のブレークポイントまで進む）</li>
-      <li><strong>ウォッチ式</strong>：「Watch」欄に式を追加して値をリアルタイムで監視</li>
-      <li><strong>コールスタック</strong>：「Call Stack」欄でどの関数から呼ばれたか確認できる</li>
-      <li><strong>Consoleで変数を確認</strong>：停止中に Console タブで変数名を入力して値を確認できる</li>
-    </ul>
-  </div>
-</div>
-
-<div class="learn-point">
-  <strong>まず覚えるべき操作</strong><br>
-  ① <code>F12</code> で開発者ツールを開く<br>
-  ② 確認したい要素を右クリック → 「検証」で Elements パネルにジャンプ<br>
-  ③ エラーが出たら Console パネルを確認<br>
-  ④ CSSを試したいときは Styles ペインで値を直接変更してみる（リロードで元に戻る）<br>
-  ⑤ JSの動作を追いたいときは Sources パネルでブレークポイントを設置して1行ずつ確認
-</div>`
-      },
     ]
   },
   css: {
@@ -4602,18 +5518,20 @@ p { letter-spacing: 4px; }  /* 広い */</code></pre>
 <h3>ボックスモデルとは</h3>
 <p>CSSではすべての要素が「箱（ボックス）」として扱われます。ボックスは内側から <strong>コンテンツ → padding → border → margin</strong> の4層で構成されます。</p>
 
-<pre><code>+-----------------------------------+
-|           margin（外側余白）       |
-|  +-----------------------------+  |
-|  |      border（枠線）         |  |
-|  |  +-----------------------+  |  |
-|  |  |   padding（内側余白）  |  |  |
-|  |  |  +-----------------+  |  |  |
-|  |  |  |   コンテンツ    |  |  |  |
-|  |  |  +-----------------+  |  |  |
-|  |  +-----------------------+  |  |
-|  +-----------------------------+  |
-+-----------------------------------+</code></pre>
+<div style="display:inline-block;font-size:13px;margin:12px 0;">
+  <div style="background:#fde8c8;padding:20px;border-radius:6px;position:relative;">
+    <span style="position:absolute;top:5px;left:10px;font-weight:bold;color:#92400e;font-size:11px;">margin（外側余白）</span>
+    <div style="background:#fef3c7;padding:16px;border:3px solid #d97706;border-radius:4px;position:relative;">
+      <span style="position:absolute;top:2px;left:8px;font-weight:bold;color:#92400e;font-size:11px;">border（枠線）</span>
+      <div style="background:#d1fae5;padding:16px;border-radius:4px;position:relative;">
+        <span style="position:absolute;top:2px;left:8px;font-weight:bold;color:#065f46;font-size:11px;">padding（内側余白）</span>
+        <div style="background:#bfdbfe;padding:16px;border-radius:4px;text-align:center;font-weight:bold;color:#1e3a8a;min-width:120px;">
+          コンテンツ
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <pre><code>div {
     width: 200px;           /* コンテンツ幅 */
@@ -4625,9 +5543,35 @@ p { letter-spacing: 4px; }  /* 広い */</code></pre>
 
 <div class="html-preview">
   <div class="html-preview-bar">ブラウザ表示イメージ</div>
-  <div class="html-preview-body">
-    <div style="display:inline-block;background:#e8f4fd;border:2px solid #0066cc;padding:24px;margin:16px;">
-      <span style="color:#333;">コンテンツ領域<br>padding: 24px<br>border: 2px solid</span>
+  <div class="html-preview-body" style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+    <div style="flex:1;min-width:220px;">
+      <p style="margin:0 0 6px;font-size:11px;font-weight:bold;color:#888;">HTML</p>
+      <pre style="margin:0 0 8px;font-size:12px;"><code style="color:#CBCEE3 !important;">&lt;div class="box"&gt;コンテンツ&lt;/div&gt;</code></pre>
+      <p style="margin:0 0 6px;font-size:11px;font-weight:bold;color:#888;">CSS</p>
+      <pre style="margin:0;font-size:12px;"><code style="color:#CBCEE3 !important;">.box {
+  width: 160px;
+  padding: 24px;
+  border: 3px solid #0066cc;
+  margin: 16px;
+  background: #e8f4fd;
+}</code></pre>
+    </div>
+    <div style="flex:1;min-width:200px;">
+      <p style="margin:0 0 6px;font-size:11px;font-weight:bold;color:#888;">表示結果</p>
+      <div style="display:inline-block;font-size:11px;">
+        <div style="background:#fde8c8;padding:16px;border-radius:6px;position:relative;">
+          <span style="position:absolute;top:3px;left:8px;color:#92400e;font-weight:bold;">margin: 16px</span>
+          <div style="border:3px solid #0066cc;position:relative;border-radius:2px;">
+            <span style="position:absolute;top:1px;left:4px;color:#0066cc;font-weight:bold;background:#fde8c8;padding:0 2px;line-height:1.2;">border: 3px solid</span>
+            <div style="background:#d1fae5;padding:24px;position:relative;">
+              <span style="position:absolute;top:3px;left:6px;color:#065f46;font-weight:bold;">padding: 24px</span>
+              <div style="background:#bfdbfe;color:#1e3a8a;font-size:13px;font-weight:bold;text-align:center;padding:8px 16px;border-radius:2px;">
+                コンテンツ
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
