@@ -281,6 +281,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .de-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
 .de-date{font-family:var(--mono);font-size:13px;color:var(--muted);}
 .de-rating{color:var(--gold);font-size:14px;}
+#admin-diary-filter-date::-webkit-calendar-picker-indicator{filter:invert(0.7);cursor:pointer;}
+#diary-date::-webkit-calendar-picker-indicator{filter:invert(0.7);cursor:pointer;}
 .de-body p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:4px;}
 .de-body strong{color:var(--text);}
 
@@ -488,6 +490,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       <div class="panel active" id="panel-home">
         <div class="page-title" id="home-title">おかえりなさい！</div>
         <div class="page-sub">今日も学習を続けましょう。</div>
+        <div id="home-guide"></div>
         <div class="stats-row" id="home-stats"></div>
         <div id="home-modes"></div>
       </div>
@@ -519,10 +522,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
         <div class="page-sub">毎日の学習を記録しましょう。</div>
         <div class="diary-form-card">
           <div class="diary-form-title">✏️ 今日の記録を追加</div>
-          <div class="form-2col" style="grid-template-columns:1fr 2fr">
-            <div class="fg-d"><label>実施日<span class="required-mark">*</span></label><input type="date" id="diary-date"></div>
+          <div class="form-2col" style="display:flex;gap:24px;align-items:center;">
+            <div class="fg-d"><label>実施日<span class="required-mark">*</span></label><input type="date" id="diary-date" style="width:160px;"></div>
             <div class="fg-d"><label>本日の理解度<span class="required-mark">*</span></label>
-              <div class="stars" id="diary-stars">
+              <div class="stars" id="diary-stars" style="display:inline-flex;">
                 <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
                 <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span>
                 <span class="star" data-v="5">★</span>
@@ -6877,6 +6880,19 @@ window.nav = page=>{
 // ===== HOME =====
 function renderHome() {
   document.getElementById('home-title').textContent = `おかえりなさい、${currentUser.name}さん！`;
+  document.getElementById('home-guide').innerHTML=`
+    <div style="background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:20px;">
+      <div style="font-weight:bold;font-size:15px;margin-bottom:12px;color:var(--text);">📋 このシステムの利用について</div>
+      <p style="margin:0 0 10px;font-size:13px;line-height:1.8;color:var(--muted);">このシステムは、研修の復習と理解度チェックを目的としています。</p>
+      <div style="font-weight:bold;font-size:13px;margin-bottom:8px;color:var(--text);">約束事</div>
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:2;color:var(--muted);">
+        <li>最初に「学習する」から、Java, DB, HTML, CSS, JavaScript, Webシステムについて復習する。習っていない箇所もあるかもしれないが、必ず一読するようにする。<span style="color:#f05133;font-weight:bold;">まだ理解しきれていない部分については、EclipseやVSCodeなどを利用し、必ずハンズオンで復習する。</span></li>
+        <li>「学習する」が終わったら「問題を解く」を実施する。最初は④ランダムモードで、どのような形式・問題が出題されるか挑戦し、最終的には、<span style="color:#f05133;font-weight:bold;">①固定問題モード、②復習問題モードは全員必ず１回は実施すること。</span></li>
+        <li>③チャレンジモードは余裕がある人のみでよい。</li>
+        <li><span style="color:#f05133;font-weight:bold;">「学習日記」は毎日記載すること。</span>当日の理解度と学習内容は必須とし、その他、記載したいことがあれば追記すること。<br>なお、問題の進捗状況や日記については、他の受講者からは閲覧できないが、管理者は全受講者の状況を確認することができます。</li>
+      </ul>
+    </div>
+  `;
   const fp = currentUser.fixedProgress||{};
   const stats = currentUser.stats||{};
   let totalDone=0, totalQ=0, totalCor=0, totalAns=0;
@@ -6889,54 +6905,60 @@ function renderHome() {
   const overallPct = totalQ>0?Math.round(totalDone/totalQ*100):0;
 
   document.getElementById('home-stats').innerHTML=`
-    <div class="stat-card" style="border-top:3px solid var(--accent)">
-      <div class="stat-num">${totalDone}<span style="font-size:16px;color:var(--muted)">/${totalQ}</span></div>
+    <div class="stat-card" style="border-top:3px solid var(--accent);padding:12px 16px;">
+      <div class="stat-num" style="font-size:24px;">${totalDone}<span style="font-size:13px;color:var(--muted)">/${totalQ}</span></div>
       <div class="stat-label">完了問題数</div>
-      <div style="margin-top:10px">
-        <div class="prog-bar" style="height:5px"><div class="prog-fill accent" style="width:${overallPct}%;background:var(--accent)"></div></div>
+      <div style="margin-top:8px">
+        <div class="prog-bar" style="height:4px"><div class="prog-fill accent" style="width:${overallPct}%;background:var(--accent)"></div></div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right">${overallPct}%</div>
       </div>
     </div>
-    <div class="stat-card" style="border-top:3px solid var(--accent2)">
-      <div class="stat-num" style="color:var(--accent2)">${rate}%</div>
+    <div class="stat-card" style="border-top:3px solid var(--accent2);padding:12px 16px;">
+      <div class="stat-num" style="font-size:24px;color:var(--accent2)">${rate}%</div>
       <div class="stat-label">正答率（自動採点）</div>
-      <div style="margin-top:10px;font-size:13px;color:var(--muted)">${totalCor} / ${totalAns} 問正解</div>
+      <div style="margin-top:6px;font-size:12px;color:var(--muted)">${totalCor} / ${totalAns} 問正解</div>
     </div>
-    <div class="stat-card" style="border-top:3px solid var(--gold)">
-      <div class="stat-num" style="color:var(--gold)">${totalAns}</div>
+    <div class="stat-card" style="border-top:3px solid var(--gold);padding:12px 16px;">
+      <div class="stat-num" style="font-size:24px;color:var(--gold)">${totalAns}</div>
       <div class="stat-label">総回答数</div>
     </div>
   `;
 
-  const modes=[
-    {key:'fixed',    label:'① 固定問題モード',   icon:'📌',
-     color:'var(--c-fixed)',     bg:'rgba(0,200,240,.06)',    border:'rgba(0,200,240,.22)',
-     cats:['js_basic','dom']},
-    {key:'review',   label:'② 復習問題モード',   icon:'🔁',
-     color:'var(--c-review)',    bg:'rgba(255,170,0,.06)',    border:'rgba(255,170,0,.22)',
-     cats:['java_review','db_review']},
-    {key:'challenge',label:'③ チャレンジモード', icon:'🔥',
-     color:'var(--c-challenge)', bg:'rgba(255,77,109,.06)',   border:'rgba(255,77,109,.22)',
-     cats:['java_challenge','db_challenge']},
-  ];
-
-  document.getElementById('home-modes').innerHTML = modes.map(m=>`
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <span style="font-size:18px">${m.icon}</span>
-        <span style="font-size:16px;font-weight:700;color:var(--text)">${m.label}</span>
-        <div style="flex:1;height:1px;background:var(--border);margin-left:8px"></div>
-        <button onclick="nav(&apos;quiz-select&apos;)" style="padding:5px 14px;
-          background:transparent;border:1px solid var(--border);border-radius:6px;
-          color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--sans);">
-          問題を解く →
-        </button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
-        ${m.cats.map(cat=>homeCatCard(cat,fp,stats,m.color,m.bg,m.border)).join('')}
+  document.getElementById('home-modes').innerHTML=`
+    <div style="margin-top:24px;">
+      <div style="font-weight:bold;font-size:15px;margin-bottom:14px;color:var(--text);">メニュー</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+        <div onclick="nav('learn')" style="cursor:pointer;background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:28px;">📚</span>
+          <div>
+            <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">学習する</div>
+            <div style="font-size:12px;color:var(--muted);">各テーマの内容を復習する</div>
+          </div>
+        </div>
+        <div onclick="nav('quiz-select')" style="cursor:pointer;background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:28px;">📝</span>
+          <div>
+            <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">問題を解く</div>
+            <div style="font-size:12px;color:var(--muted);">理解度チェック・問題に挑戦する</div>
+          </div>
+        </div>
+        <div onclick="nav('progress')" style="cursor:pointer;background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:28px;">📊</span>
+          <div>
+            <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">成績・進捗</div>
+            <div style="font-size:12px;color:var(--muted);">各モードの進捗と受講回数を確認する</div>
+          </div>
+        </div>
+        <div onclick="nav('diary')" style="cursor:pointer;background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:28px;">📔</span>
+          <div>
+            <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">学習日記</div>
+            <div style="font-size:12px;color:var(--muted);">毎日の学習内容・理解度を記録する</div>
+          </div>
+        </div>
       </div>
     </div>
-  `).join('');
+  `;
 }
 
 function homeCatCard(cat, fp, stats, modeColor, modeBg, modeBorder) {
@@ -7616,7 +7638,7 @@ window.saveDiary=async function(){
   if(diaryRating===0) return toast('本日の理解度を選択してください','error');
   if(!content) return toast('本日学習した内容を入力してください','error');
   try{
-    await addDoc(collection(db,'diaries'),{uid:currentUser.uid,userName:currentUser.name,date,content,challenge,memo,rating:diaryRating,createdAt:serverTimestamp()});
+    await setDoc(doc(db,'diaries',`${currentUser.uid}_${date}`),{uid:currentUser.uid,userName:currentUser.name,date,content,challenge,memo,rating:diaryRating,createdAt:serverTimestamp()});
     toast('日記を保存しました！','success');
     document.getElementById('diary-date').value=today();
     document.getElementById('diary-content').value='';
@@ -7664,9 +7686,21 @@ async function renderAdminHome(){
     });
 
     document.getElementById('admin-stats').innerHTML=`
-      <div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">受講者数</div></div>
-      <div class="stat-card"><div class="stat-num">${totalDone}</div><div class="stat-label">総完了問題数</div></div>
-      <div class="stat-card"><div class="stat-num">${diarySnap.docs.length}</div><div class="stat-label">日記件数</div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        ${users.map(u=>`
+          <div onclick="goToUserDetail('${u.id}')" style="
+            cursor:pointer;background:var(--surface);border:1px solid var(--border);
+            border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:10px;
+            transition:border-color .2s;font-size:14px;font-weight:600;
+          " onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;
+              background:linear-gradient(135deg,var(--accent),var(--purple));
+              display:flex;align-items:center;justify-content:center;
+              font-weight:700;font-size:14px;color:#000;">${(u.name||'?').charAt(0).toUpperCase()}</div>
+            <span>${u.name||'名前なし'}</span>
+          </div>
+        `).join('')}
+      </div>
     `;
 
     const recentDiaries=diarySnap.docs.map(d=>d.data())
@@ -7676,14 +7710,9 @@ async function renderAdminHome(){
       <div class="diary-entries">${recentDiaries.map(e=>`
         <div class="diary-entry">
           <div class="de-head">
-            <span style="color:var(--accent);font-weight:600">${e.userName||'—'}</span>
+            <span style="color:var(--accent);font-weight:600;display:inline-block;min-width:200px;">${e.userName||'—'}</span>
             <span class="de-date">${e.date}</span>
-            <span class="de-rating">${'★'.repeat(e.rating||0)} ${e.rating||0}/5</span>
-          </div>
-          <div class="de-body">
-            ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
-            ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
-            ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+            <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
           </div>
         </div>`).join('')||'<p style="color:var(--muted)">まだ日記がありません。</p>'}
       </div>
@@ -7773,6 +7802,16 @@ async function renderAdminUsers(){
     `;
   }catch(e){el.innerHTML=`<p style="color:var(--warn)">エラー: ${e.message}</p>`;}
 }
+
+window.goToUserDetail=function(uid){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-admin-users').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[1]?.classList.add('active');
+  document.getElementById('admin-list-view').style.display='none';
+  document.getElementById('admin-detail-view').style.display='block';
+  showUserDetail(uid);
+};
 
 window.showUserDetail=async function(uid){
   document.getElementById('admin-list-view').style.display='none';
@@ -7920,28 +7959,62 @@ window.switchAtab=function(idx,btn){
 window.backToList=function(){
   document.getElementById('admin-list-view').style.display='block';
   document.getElementById('admin-detail-view').style.display='none';
+  renderAdminUsers();
 };
+let adminDiaryAllEntries=[];
+let adminDiaryFilterDate=null;
 async function renderAdminDiary(){
   const el=document.getElementById('admin-diary-body');
   el.innerHTML='<div class="loading"><div class="spinner"></div>読み込み中...</div>';
   try{
     const snap=await getDocs(query(collection(db,'diaries'),orderBy('createdAt','desc')));
-    const entries=snap.docs.map(d=>d.data());
-    if(entries.length===0){el.innerHTML='<p style="color:var(--muted)">日記がありません。</p>';return;}
-    el.innerHTML=`<div class="diary-entries">${entries.map(e=>`
-      <div class="diary-entry">
-        <div class="de-head">
-          <span style="color:var(--accent);font-weight:600">${e.userName||'—'}</span>
-          <span class="de-date">${e.date}</span>
-          <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
-        </div>
-        <div class="de-body">
-          ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
-          ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
-          ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
-        </div>
-      </div>`).join('')}</div>`;
+    adminDiaryAllEntries=snap.docs.map(d=>d.data());
+    if(adminDiaryFilterDate===null) adminDiaryFilterDate=today();
+    if(adminDiaryAllEntries.length===0){el.innerHTML='<p style="color:var(--muted)">日記がありません。</p>';return;}
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--muted);">日付で絞り込み：</label>
+        <input type="date" id="admin-diary-filter-date" style="
+          background:var(--surface3);border:1px solid var(--accent);border-radius:8px;
+          padding:8px 14px;color:var(--text);font-size:13px;font-family:var(--mono);min-width:180px;
+        " value="${adminDiaryFilterDate}" onchange="filterAdminDiaryByDate()">
+        <button onclick="document.getElementById('admin-diary-filter-date').value='';filterAdminDiaryByDate();" style="
+          background:transparent;border:1px solid var(--border);border-radius:8px;
+          padding:6px 12px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--sans);
+        ">クリア</button>
+        <span id="admin-diary-count" style="font-size:13px;font-weight:bold;color:var(--accent);background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);border-radius:20px;padding:3px 12px;"></span>
+      </div>
+      <div id="admin-diary-filtered-list"></div>
+    `;
+    filterAdminDiaryByDate();
   }catch(e){el.innerHTML=`<p style="color:var(--warn)">エラー: ${e.message}</p>`;}
+}
+
+window.filterAdminDiaryByDate=function(){
+  const filterDate=document.getElementById('admin-diary-filter-date')?.value||'';
+  adminDiaryFilterDate=filterDate;
+  const el=document.getElementById('admin-diary-filtered-list');
+  if(!el) return;
+  const filtered=filterDate?adminDiaryAllEntries.filter(e=>e.date===filterDate):adminDiaryAllEntries;
+  const countEl=document.getElementById('admin-diary-count');
+  if(countEl) countEl.textContent=`${filtered.length} 件`;
+  if(filtered.length===0){
+    el.innerHTML='<p style="color:var(--muted)">該当する日記がありません。</p>';
+    return;
+  }
+  el.innerHTML=`<div class="diary-entries">${filtered.map(e=>`
+    <div class="diary-entry">
+      <div class="de-head">
+        <span style="color:var(--accent);font-weight:600;display:inline-block;min-width:200px;">${e.userName||'—'}</span>
+        <span class="de-date">${e.date}</span>
+        <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
+      </div>
+      <div class="de-body">
+        ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
+        ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
+        ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+      </div>
+    </div>`).join('')}</div>`;
 }
 
 // ===== UTILS =====
