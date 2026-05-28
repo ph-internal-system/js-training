@@ -268,7 +268,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .diary-form-title{font-size:15px;font-weight:700;color:var(--accent);margin-bottom:20px;}
 .form-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .fg-d label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px;letter-spacing:1px;text-transform:uppercase;}
-.required-mark{font-size:10px;color:#e53935;font-weight:700;letter-spacing:0;margin-left:4px;vertical-align:middle;}
+.required-mark{font-size:14px;color:#ff1744;font-weight:700;letter-spacing:0;margin-left:5px;vertical-align:middle;}
 .fg-d input,.fg-d textarea{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);
   border-radius:var(--radius);color:var(--text);font-size:14px;font-family:var(--sans);transition:.2s;}
 .fg-d input:focus,.fg-d textarea:focus{outline:none;border-color:var(--accent);}
@@ -522,10 +522,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
         <div class="page-sub">毎日の学習を記録しましょう。</div>
         <div class="diary-form-card">
           <div class="diary-form-title">✏️ 今日の記録を追加</div>
-          <div class="form-2col" style="display:flex;gap:24px;align-items:center;">
-            <div class="fg-d"><label>実施日<span class="required-mark">*</span></label><input type="date" id="diary-date" style="width:160px;"></div>
-            <div class="fg-d"><label>本日の理解度<span class="required-mark">*</span></label>
-              <div class="stars" id="diary-stars" style="display:inline-flex;">
+          <div class="form-2col" style="display:flex;gap:24px;align-items:flex-start;">
+            <div class="fg-d"><label>実施日<span class="required-mark">*</span></label><div id="diary-date-display" style="font-size:16px;font-weight:600;color:var(--text);font-family:var(--mono);padding:10px 0 4px;margin-left:8px;"></div></div>
+            <div class="fg-d" style="margin-left:20px;"><label>本日の理解度<span class="required-mark">*</span></label>
+              <div class="stars" id="diary-stars" style="display:inline-flex;margin-top:0;">
                 <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
                 <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span>
                 <span class="star" data-v="5">★</span>
@@ -922,7 +922,7 @@ function initApp() {
   if(isAdmin){ nav('admin-home'); }
   else{ nav('home'); }
   initStars();
-  document.getElementById('diary-date').value = today();
+  document.getElementById('diary-date-display').textContent = today();
 }
 
 // ===== LEARN DATA =====
@@ -6896,7 +6896,7 @@ function renderHome() {
   const fp = currentUser.fixedProgress||{};
   const stats = currentUser.stats||{};
   let totalDone=0, totalQ=0, totalCor=0, totalAns=0;
-  MANAGED_CATS.forEach(cat=>{
+  MANAGED_CATS.filter(cat=>CATEGORIES[cat].mode!=='challenge').forEach(cat=>{
     totalQ += CATEGORIES[cat].total||0;
     totalDone += Object.keys(fp[cat]||{}).length;
     Object.values(stats[cat]||{}).forEach(ls=>{ totalAns+=ls.answered||0; totalCor+=ls.correct||0; });
@@ -7630,17 +7630,16 @@ function initStars(){
   });
 }
 window.saveDiary=async function(){
-  const date=document.getElementById('diary-date').value;
+  const date=today();
   const content=document.getElementById('diary-content').value.trim();
   const challenge=document.getElementById('diary-challenge').value.trim();
   const memo=document.getElementById('diary-memo').value.trim();
-  if(!date) return toast('実施日を選択してください','error');
   if(diaryRating===0) return toast('本日の理解度を選択してください','error');
   if(!content) return toast('本日学習した内容を入力してください','error');
   try{
     await setDoc(doc(db,'diaries',`${currentUser.uid}_${date}`),{uid:currentUser.uid,userName:currentUser.name,date,content,challenge,memo,rating:diaryRating,createdAt:serverTimestamp()});
     toast('日記を保存しました！','success');
-    document.getElementById('diary-date').value=today();
+    document.getElementById('diary-date-display').textContent=today();
     document.getElementById('diary-content').value='';
     document.getElementById('diary-challenge').value='';
     document.getElementById('diary-memo').value='';
