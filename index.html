@@ -7666,18 +7666,24 @@ async function renderDiary(){
     const snap=await getDocs(q);
     const entries=snap.docs.map(d=>d.data());
     if(entries.length===0){list.innerHTML='<p style="color:var(--muted)">まだ日記がありません。</p>';return;}
-    list.innerHTML=entries.map(e=>`
-      <div class="diary-entry">
-        <div class="de-head">
-          <span class="de-date">📅 ${e.date}</span>
-          <span class="de-rating">${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)} ${e.rating}/5</span>
+    list.innerHTML=`
+      <div style="border-top:1px solid var(--border);margin-top:24px;">
+        <div style="display:flex;align-items:center;gap:16px;padding:6px 4px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+          <span style="min-width:100px;flex-shrink:0;">日付</span>
+          <span style="flex:1;">学習内容</span>
+          <span style="min-width:90px;flex-shrink:0;">理解度</span>
         </div>
-        <div class="de-body">
-          ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
-          ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
-          ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
-        </div>
-      </div>`).join('');
+        ${entries.map(e=>`
+          <div style="border-bottom:1px solid var(--border);padding:10px 4px;font-size:13px;">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:${e.challenge||e.memo?'8px':'0'};">
+              <span style="font-family:var(--mono);color:var(--muted);min-width:100px;flex-shrink:0;">${e.date}</span>
+              <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--muted);">${e.content||'—'}</span>
+              <span style="color:var(--gold);min-width:90px;flex-shrink:0;">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))}</span>
+            </div>
+            ${e.challenge?`<div style="font-size:12px;color:var(--muted);padding-left:4px;margin-bottom:4px;"><strong style="color:var(--text);">課題：</strong>${e.challenge}</div>`:''}
+            ${e.memo?`<div style="font-size:12px;color:var(--muted);padding-left:4px;"><strong style="color:var(--text);">メモ：</strong>${e.memo}</div>`:''}
+          </div>`).join('')}
+      </div>`;
   }catch(e){list.innerHTML='<p style="color:var(--warn)">読み込みエラー</p>';}
 }
 
@@ -7687,6 +7693,16 @@ async function renderAdminHome(){
     const usersSnap=await getDocs(query(collection(db,'users'),where('role','==','learner')));
     const users=usersSnap.docs.map(d=>({id:d.id,...d.data()}));
     const diarySnap=await getDocs(collection(db,'diaries'));
+
+    const latestDiaryMap={};
+    diarySnap.docs.forEach(d=>{
+      const data=d.data();
+      if(!data.uid||!data.createdAt) return;
+      if(!latestDiaryMap[data.uid]||data.createdAt.seconds>latestDiaryMap[data.uid]){
+        latestDiaryMap[data.uid]=data.createdAt.seconds;
+      }
+    });
+    users.sort((a,b)=>(latestDiaryMap[b.id]||0)-(latestDiaryMap[a.id]||0));
 
     let totalDone=0;
     users.forEach(u=>{
@@ -7715,15 +7731,24 @@ async function renderAdminHome(){
     const recentDiaries=diarySnap.docs.map(d=>d.data())
       .filter(d=>d.createdAt).sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds).slice(0,5);
     document.getElementById('admin-home-body').innerHTML=`
-      <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:12px">最近の学習日記</div>
-      <div class="diary-entries">${recentDiaries.map(e=>`
-        <div class="diary-entry">
-          <div class="de-head">
-            <span style="color:var(--accent);font-weight:600;display:inline-block;min-width:200px;">${e.userName||'—'}</span>
-            <span class="de-date">${e.date}</span>
-            <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
-          </div>
-        </div>`).join('')||'<p style="color:var(--muted)">まだ日記がありません。</p>'}
+      <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:8px">最近の学習日記</div>
+      <div style="border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:16px;padding:6px 4px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+          <span style="min-width:120px;flex-shrink:0;">名前</span>
+          <span style="min-width:100px;flex-shrink:0;">日付</span>
+          <span style="flex:1;">学習内容</span>
+          <span style="flex-shrink:0;min-width:90px;">理解度</span>
+        </div>
+        ${recentDiaries.map(e=>{
+        const contentPreview=(e.content||'').length>50?(e.content||'').slice(0,50)+'…':(e.content||'—');
+        return `
+        <div style="display:flex;align-items:center;gap:16px;padding:10px 4px;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--accent);font-weight:600;min-width:120px;flex-shrink:0;">${e.userName||'—'}</span>
+          <span style="font-family:var(--mono);color:var(--muted);min-width:100px;flex-shrink:0;">${e.date}</span>
+          <span style="color:var(--muted);font-size:12px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${contentPreview}</span>
+          <span style="color:var(--gold);flex-shrink:0;min-width:90px;">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))}</span>
+        </div>`;
+      }).join('')||'<p style="color:var(--muted);padding:10px 4px;">まだ日記がありません。</p>'}
       </div>
     `;
   }catch(e){console.error(e);}
@@ -7736,6 +7761,17 @@ async function renderAdminUsers(){
     const snap=await getDocs(query(collection(db,'users'),where('role','==','learner')));
     const users=snap.docs.map(d=>({id:d.id,...d.data()}));
     if(users.length===0){el.innerHTML='<p style="color:var(--muted)">受講者がいません。</p>';return;}
+
+    const diarySnap=await getDocs(collection(db,'diaries'));
+    const latestDiaryMap={};
+    diarySnap.docs.forEach(d=>{
+      const data=d.data();
+      if(!data.uid||!data.createdAt) return;
+      if(!latestDiaryMap[data.uid]||data.createdAt.seconds>latestDiaryMap[data.uid]){
+        latestDiaryMap[data.uid]=data.createdAt.seconds;
+      }
+    });
+    users.sort((a,b)=>(latestDiaryMap[b.id]||0)-(latestDiaryMap[a.id]||0));
 
     // 全体サマリー
     const totalQ=MANAGED_CATS.reduce((a,c)=>a+(CATEGORIES[c].total||0),0);
@@ -7978,7 +8014,7 @@ async function renderAdminDiary(){
   try{
     const snap=await getDocs(query(collection(db,'diaries'),orderBy('createdAt','desc')));
     adminDiaryAllEntries=snap.docs.map(d=>d.data());
-    if(adminDiaryFilterDate===null) adminDiaryFilterDate=today();
+    if(adminDiaryFilterDate===null) adminDiaryFilterDate='';
     if(adminDiaryAllEntries.length===0){el.innerHTML='<p style="color:var(--muted)">日記がありません。</p>';return;}
     el.innerHTML=`
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
@@ -8011,19 +8047,26 @@ window.filterAdminDiaryByDate=function(){
     el.innerHTML='<p style="color:var(--muted)">該当する日記がありません。</p>';
     return;
   }
-  el.innerHTML=`<div class="diary-entries">${filtered.map(e=>`
-    <div class="diary-entry">
-      <div class="de-head">
-        <span style="color:var(--accent);font-weight:600;display:inline-block;min-width:200px;">${e.userName||'—'}</span>
-        <span class="de-date">${e.date}</span>
-        <span class="de-rating">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} ${e.rating||0}/5</span>
+  el.innerHTML=`
+    <div style="border-top:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:16px;padding:6px 4px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+        <span style="min-width:140px;flex-shrink:0;">名前</span>
+        <span style="min-width:100px;flex-shrink:0;">日付</span>
+        <span style="flex:1;">学習内容</span>
+        <span style="min-width:90px;flex-shrink:0;">理解度</span>
       </div>
-      <div class="de-body">
-        ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
-        ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
-        ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
-      </div>
-    </div>`).join('')}</div>`;
+      ${filtered.map(e=>`
+        <div style="border-bottom:1px solid var(--border);padding:10px 4px;font-size:13px;">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:${e.challenge||e.memo?'8px':'0'};">
+            <span style="color:var(--accent);font-weight:600;min-width:140px;flex-shrink:0;">${e.userName||'—'}</span>
+            <span style="font-family:var(--mono);color:var(--muted);min-width:100px;flex-shrink:0;">${e.date}</span>
+            <span style="color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${e.content||'—'}</span>
+            <span style="color:var(--gold);min-width:90px;flex-shrink:0;">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))}</span>
+          </div>
+          ${e.challenge?`<div style="font-size:12px;color:var(--muted);padding-left:4px;margin-bottom:4px;"><strong style="color:var(--text);">課題：</strong>${e.challenge}</div>`:''}
+          ${e.memo?`<div style="font-size:12px;color:var(--muted);padding-left:4px;"><strong style="color:var(--text);">メモ：</strong>${e.memo}</div>`:''}
+        </div>`).join('')}
+    </div>`;
 }
 
 // ===== UTILS =====
