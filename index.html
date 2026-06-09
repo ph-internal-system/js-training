@@ -7978,16 +7978,16 @@ window.showUserDetail=async function(uid){
       <div class="atab-panel active" id="atp-0">${catSections}</div>
       <div class="atab-panel" id="atp-1">
         ${diaries.length===0?'<p style="color:var(--muted);padding:20px 0">日記がありません。</p>':`
-          <div class="diary-entries">${diaries.map(e=>`
-            <div class="diary-entry">
-              <div class="de-head">
-                <span class="de-date">📅 ${e.date}</span>
-                <span class="de-rating">${'★'.repeat(e.rating||0)} ${e.rating||0}/5</span>
+          <div style="display:flex;flex-direction:column;gap:12px;">${diaries.map(e=>`
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border);">
+                <span style="font-family:var(--mono);font-size:13px;color:var(--muted);">📅 ${e.date}</span>
+                <span style="color:var(--gold);font-size:14px;">${'★'.repeat(e.rating||0)}${'☆'.repeat(5-(e.rating||0))} <span style="color:var(--muted);font-size:12px;">${e.rating||0}/5</span></span>
               </div>
-              <div class="de-body">
-                ${e.content?`<p><strong>学習内容：</strong>${e.content}</p>`:''}
-                ${e.challenge?`<p><strong>課題：</strong>${e.challenge}</p>`:''}
-                ${e.memo?`<p><strong>メモ：</strong>${e.memo}</p>`:''}
+              <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+                ${e.content?`<div><div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">学習内容</div><div style="font-size:13px;color:var(--text);white-space:pre-wrap;line-height:1.7;">${e.content}</div></div>`:''}
+                ${e.challenge?`<div><div style="font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">課題・難しかった点</div><div style="font-size:13px;color:var(--muted);white-space:pre-wrap;line-height:1.7;">${e.challenge}</div></div>`:''}
+                ${e.memo?`<div><div style="font-size:11px;font-weight:700;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">メモ</div><div style="font-size:13px;color:var(--muted);white-space:pre-wrap;line-height:1.7;">${e.memo}</div></div>`:''}
               </div>
             </div>`).join('')}
           </div>`}
