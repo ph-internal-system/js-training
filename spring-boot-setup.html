@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Boot サンプル セットアップ手順</title>
+<style>
+  :root{
+    --bg:#1e2a3a; --surface:#28374a; --surface2:#304055; --surface3:#384a62;
+    --border:#445566; --text:#eef4ff; --muted:#8aadcc; --radius:10px;
+    --mono:'IBM Plex Mono',monospace; --sans:'Zen Kaku Gothic New',sans-serif;
+    --accent:#6db33f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 20px 80px; background:var(--bg); color:var(--text);
+    font-family:var(--sans); line-height:1.8; font-size:15px;
+  }
+  .wrap{max-width:820px; margin:0 auto;}
+  .back-link{
+    display:inline-block; margin-bottom:24px; color:var(--muted); text-decoration:none;
+    font-size:14px; border:1px solid var(--border); border-radius:8px; padding:6px 14px;
+    background:transparent; font-family:var(--sans); cursor:pointer;
+  }
+  .back-link:hover{color:var(--accent); border-color:var(--accent);}
+  h1{
+    font-size:26px; margin:0 0 8px; color:var(--text);
+    display:flex; align-items:center; gap:10px;
+  }
+  h1 .leaf{font-size:28px;}
+  .subtitle{color:var(--muted); font-size:14px; margin:0 0 32px;}
+  h2{
+    font-size:18px; color:var(--accent); border-bottom:2px solid rgba(109,179,63,.3);
+    padding-bottom:8px; margin:40px 0 16px;
+  }
+  h3{font-size:15px; color:var(--text); margin:24px 0 10px;}
+  p{margin:0 0 14px;}
+  .callout{
+    background:rgba(109,179,63,.08); border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; font-size:14px;
+  }
+  .callout.warn{
+    background:rgba(255,170,0,.08); border-left-color:#ffaa00;
+  }
+  .callout strong{color:var(--accent);}
+  .callout.warn strong{color:#ffaa00;}
+  pre{
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:13px;
+    line-height:1.7; margin:14px 0;
+  }
+  code{font-family:var(--mono); font-size:0.92em;}
+  p code, li code{
+    background:var(--surface2); padding:1px 6px; border-radius:4px; color:#a8e090;
+  }
+  ol, ul{padding-left:22px; margin:0 0 14px;}
+  li{margin-bottom:6px;}
+  .step-list{counter-reset:step;}
+  .steps-section{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 24px; margin-bottom:24px;
+  }
+  .steps-section h3{margin-top:0; color:var(--accent); font-size:16px;}
+  .ref-box{
+    background:var(--surface2); border:1px dashed var(--border); border-radius:var(--radius);
+    padding:18px 22px; margin:20px 0;
+  }
+  .ref-box h3{margin-top:0; color:var(--muted); font-size:15px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th, td{padding:6px 10px; border:1px solid var(--border); text-align:left;}
+  th{background:rgba(109,179,63,.15);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <button class="back-link" onclick="window.close()">✕ このウィンドウを閉じる</button>
+
+  <h1><span class="leaf">🍃</span> Spring Boot サンプル セットアップ手順</h1>
+  <p class="subtitle">「Spring Boot」教材 第8章「まとめ：簡単なCRUD APIを作る」の内容を、実際に手元で動かすための手順です。</p>
+
+  <h2>H2データベースについて</h2>
+  <p>H2は、Javaアプリの中に組み込まれて動く「インメモリ（メモリ上だけで動く）データベース」です。MySQLのような別ソフトのインストールや、サーバーの起動が一切不要なため、動作確認だけが目的であれば最も手軽な選択肢です。</p>
+
+  <div class="callout">
+    <strong>メリット</strong><br>
+    ・別途DBサーバーのインストール・起動が不要<br>
+    ・Spring Initializrで依存関係に追加するだけで使える<br>
+    ・application.properties の設定だけで、アプリ起動と同時にDBも自動的に用意される
+  </div>
+
+  <div class="callout warn">
+    <strong>注意点</strong><br>
+    アプリを停止するとデータは消えます（メモリ上にしかないため、永続化はされません）。動作確認・学習用途には向きますが、本番運用やデータを残しておきたい用途には不向きです。
+  </div>
+
+  <div class="ref-box">
+    <h3>参考：本格的にDBを使う場合</h3>
+    <p>実際にMySQL等のDBMSを使う場合は、以下が事前に必要になります。</p>
+    <ol>
+      <li>MySQLサーバーがインストール済みで、起動していること</li>
+      <li><code>CREATE DATABASE mydb;</code> のように、データベース（スキーマ）自体を事前に自分で作成しておくこと（Spring Bootが自動生成してくれるのは「テーブル」までで、「データベース」そのものは作ってくれません）</li>
+      <li>それを踏まえて <code>application.properties</code> に接続先（URL・ユーザー名・パスワード）を設定する</li>
+    </ol>
+    <div class="callout" style="font-size:15px;margin-bottom:0;">
+      <strong>今回は動作確認が目的のため、H2を使う方法で進めます。</strong>
+    </div>
+  </div>
+
+  <h2>実装手順</h2>
+
+  <div class="steps-section">
+    <h3>① 環境構築</h3>
+    <ol>
+      <li>Spring Initializr（<code>https://start.spring.io</code>）でプロジェクトを作成する。
+        <table>
+          <tr><th>Project</th><td>Maven</td></tr>
+          <tr><th>Language</th><td>Java</td></tr>
+          <tr><th>Group</th><td>com.example</td></tr>
+          <tr><th>Artifact</th><td>my-app</td></tr>
+          <tr><th>Package name</th><td>com.example.myapp</td></tr>
+          <tr><th>Packaging</th><td>Jar</td></tr>
+          <tr><th>Dependencies</th><td>Spring Web / Spring Data JPA / Validation / H2 Database</td></tr>
+        </table>
+        <p style="color:var(--muted);font-size:13px;margin-top:8px;">※ Group・Artifact・Package name は、教材内のコード例（<code>com.example.myapp</code> パッケージ、<code>MyAppApplication.java</code>）とそのまま一致するように設定しています。Packagingは組み込みTomcatを使うため「Jar」を選択します。</p>
+      </li>
+      <li>ダウンロードしたZIPファイルを展開する（右クリック →「すべて展開...」→ 展開先フォルダを選んで実行）</li>
+      <li>VSCodeで「ファイル → フォルダーを開く」から、展開したフォルダを開く</li>
+      <li><code>src/main/resources/application.properties</code> を作成し、以下を記述する。
+<pre><code># H2をメモリ上に作成する接続設定
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# エンティティに合わせてテーブルを自動作成・更新する
+spring.jpa.hibernate.ddl-auto=update
+
+# 実行されたSQLをログに表示する（学習中の確認に便利）
+spring.jpa.show-sql=true
+
+# H2の管理画面（ブラウザ）を有効にする（任意・データの中身を目視できて便利）
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console</code></pre>
+      </li>
+    </ol>
+  </div>
+
+  <div class="steps-section">
+    <h3>② サーバーサイドのコードを依存関係の順に作成</h3>
+    <p>依存されている側（下位）から先に作ると、コンパイルエラーが出ずスムーズです。</p>
+    <ol start="5">
+      <li>エンティティ … <code>entity/Book.java</code></li>
+      <li>Repository … <code>repository/BookRepository.java</code></li>
+      <li>入力値クラス … <code>dto/BookForm.java</code></li>
+      <li>カスタム例外 … <code>exception/ResourceNotFoundException.java</code></li>
+      <li>Service … <code>service/BookService.java</code></li>
+      <li>Controller … <code>controller/BookController.java</code></li>
+      <li>グローバル例外ハンドラ … <code>exception/GlobalExceptionHandler.java</code></li>
+    </ol>
+    <p style="color:var(--muted);font-size:13px;">※ ここでの<code>entity/</code>などは、<code>com.example.myapp</code>パッケージの下に作るサブパッケージ（サブフォルダ）です。VSCodeでは、パッケージ名の部分を右クリック →「新しいフォルダー」で <code>entity</code>・<code>repository</code>・<code>dto</code>・<code>service</code>・<code>controller</code>・<code>exception</code> を作成し、それぞれのフォルダの中に対応するクラスを作成してください。各クラスの実装内容（package文・import文を含む）は、学習教材の「Spring Boot」テーマ 第8章「まとめ：簡単なCRUD APIを作る」を参照してください。</p>
+  </div>
+
+  <div class="steps-section">
+    <h3>③ 動作確認</h3>
+    <ol start="12">
+      <li>動作確認用の簡易画面 <code>test.html</code> を <code>src/main/resources/static/</code> に配置する（中身は教材 第8章「⑦ 動作確認用の簡易画面」を参照）</li>
+      <li>アプリを起動する。VSCodeのターミナルで <code>mvn spring-boot:run</code>、または IDEの実行ボタンからメインクラスを実行</li>
+      <li>ブラウザで <code>http://localhost:8080/test.html</code> にアクセスし、各ボタン（一覧取得・詳細取得・新規登録・更新・削除）を試す</li>
+    </ol>
+    <div class="callout">
+      <strong>おまけ</strong><br>
+      <code>http://localhost:8080/h2-console</code> にアクセスすると、H2のデータ中身をブラウザから直接見ることもできます（JDBC URL欄に <code>jdbc:h2:mem:testdb</code> を入力して接続）。
+    </div>
+  </div>
+
+  <button class="back-link" onclick="window.close()">✕ このウィンドウを閉じる</button>
+
+</div>
+</body>
+</html>

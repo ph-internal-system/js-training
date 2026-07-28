@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyBatis サンプル セットアップ手順</title>
+<style>
+  :root{
+    --bg:#1e2a3a; --surface:#28374a; --surface2:#304055; --surface3:#384a62;
+    --border:#445566; --text:#eef4ff; --muted:#8aadcc; --radius:10px;
+    --mono:'IBM Plex Mono',monospace; --sans:'Zen Kaku Gothic New',sans-serif;
+    --accent:#0d9488;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 20px 80px; background:var(--bg); color:var(--text);
+    font-family:var(--sans); line-height:1.8; font-size:15px;
+  }
+  .wrap{max-width:820px; margin:0 auto;}
+  .back-link{
+    display:inline-block; margin-bottom:24px; color:var(--muted); text-decoration:none;
+    font-size:14px; border:1px solid var(--border); border-radius:8px; padding:6px 14px;
+    background:transparent; font-family:var(--sans); cursor:pointer;
+  }
+  .back-link:hover{color:var(--accent); border-color:var(--accent);}
+  h1{
+    font-size:26px; margin:0 0 8px; color:var(--text);
+    display:flex; align-items:center; gap:10px;
+  }
+  h1 .leaf{font-size:28px;}
+  .subtitle{color:var(--muted); font-size:14px; margin:0 0 32px;}
+  h2{
+    font-size:18px; color:var(--accent); border-bottom:2px solid rgba(13,148,136,.3);
+    padding-bottom:8px; margin:40px 0 16px;
+  }
+  h3{font-size:15px; color:var(--text); margin:24px 0 10px;}
+  p{margin:0 0 14px;}
+  .callout{
+    background:rgba(13,148,136,.08); border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; font-size:14px;
+  }
+  .callout.warn{
+    background:rgba(255,170,0,.08); border-left-color:#ffaa00;
+  }
+  .callout strong{color:var(--accent);}
+  .callout.warn strong{color:#ffaa00;}
+  pre{
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:13px;
+    line-height:1.7; margin:14px 0;
+  }
+  code{font-family:var(--mono); font-size:0.92em;}
+  p code, li code, td code{
+    background:var(--surface2); padding:1px 6px; border-radius:4px; color:#7fd4c8;
+  }
+  ol, ul{padding-left:22px; margin:0 0 14px;}
+  li{margin-bottom:6px;}
+  .steps-section{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 24px; margin-bottom:24px;
+  }
+  .steps-section h3{margin-top:0; color:var(--accent); font-size:16px;}
+  .diff-label{
+    display:inline-block; font-size:12px; font-weight:700; border-radius:4px;
+    padding:2px 8px; margin:10px 0 4px;
+  }
+  .diff-label.before{background:rgba(255,77,109,.15); color:#ff4d6d;}
+  .diff-label.after{background:rgba(13,148,136,.18); color:#0d9488;}
+  .ref-box{
+    background:var(--surface2); border:1px dashed var(--border); border-radius:var(--radius);
+    padding:18px 22px; margin:20px 0;
+  }
+  .ref-box h3{margin-top:0; color:var(--muted); font-size:15px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th, td{padding:6px 10px; border:1px solid var(--border); text-align:left;}
+  th{background:rgba(13,148,136,.15);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <button class="back-link" onclick="window.close()">✕ このウィンドウを閉じる</button>
+
+  <h1><span class="leaf">🔗</span> MyBatis サンプル セットアップ手順</h1>
+  <p class="subtitle">「MyBatis」教材 第8章「まとめ：MyBatisでCRUD APIを組み立てる」の内容を、<strong>Spring Boot編で作成したプロジェクトをそのまま流用</strong>しながら手元で動かすための手順です。</p>
+
+  <div class="ref-box">
+    <h3>前提</h3>
+    <p style="margin:0;">「Spring Boot」教材のセットアップ手順（<code>spring-boot-setup.html</code>）を完了し、<code>my-app</code>プロジェクトが動作する状態になっていることが前提です。ここではゼロから作り直すのではなく、そのプロジェクトの<strong>JPA部分だけをMyBatisに置き換える</strong>形で進めます。</p>
+  </div>
+
+  <h2>何を再利用し、何を変更するか</h2>
+  <table>
+    <tr><th style="width:120px;">再利用（変更なし）</th><td><code>controller/BookController.java</code> / <code>form/BookForm.java</code> / <code>exception/ResourceNotFoundException.java</code> / <code>exception/GlobalExceptionHandler.java</code> / <code>test.html</code> / pom.xmlのSpring Web・H2・Validation部分 / application.propertiesのDB接続情報（<code>spring.datasource.*</code>）</td></tr>
+    <tr><th>変更</th><td>pom.xml（JPA依存関係 → MyBatis依存関係）/ application.properties（<code>spring.jpa.*</code> → <code>mybatis.*</code>）/ <code>entity/Book.java</code>（JPAアノテーションを除去）/ <code>service/BookService.java</code>（呼び出し先を<code>bookMapper</code>に変更）/ <code>MyAppApplication.java</code>（<code>@MapperScan</code>を追加）</td></tr>
+    <tr><th>新規追加</th><td><code>schema.sql</code> / <code>mapper/BookMapper.java</code> / <code>mapper/BookMapper.xml</code></td></tr>
+    <tr><th>削除</th><td><code>repository/BookRepository.java</code></td></tr>
+  </table>
+  <div class="callout warn">
+    <strong>なぜapplication.propertiesの書き換えが必要か</strong><br>
+    <code>spring.jpa.hibernate.ddl-auto=update</code>は、Hibernate（JPA）の自動設定クラスだけが読み込む設定です。pom.xmlからJPA依存を外すとHibernateの自動設定自体が有効化されなくなり、この設定は「誰にも読まれないテキスト」になってしまいます。MyBatisにはテーブルを自動生成する仕組みがないため、代わりに<code>schema.sql</code>でテーブルを用意します。
+  </div>
+
+  <h2>実装手順</h2>
+
+  <div class="steps-section">
+    <h3>① pom.xmlを変更する</h3>
+    <p>JPAの依存関係を削除し、MyBatisの依存関係を追加します。</p>
+    <span class="diff-label before">変更前（削除）</span>
+    <pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+    <span class="diff-label after">変更後（追加）</span>
+    <pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+  &lt;version&gt;4.0.1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+    <p style="color:var(--muted);font-size:13px;">※ Spring Web・Validation・H2 Databaseの依存関係はそのまま残します。</p>
+    <div class="callout warn">
+      <strong>バージョンはSpring Bootのバージョンに依存する</strong><br>
+      <code>mybatis-spring-boot-starter</code>のバージョンは、組み合わせるSpring Bootのバージョンによって対応状況が異なります。この教材のSpring Boot編は<code>spring-boot-starter-parent 3.3.0</code>を前提にしていますが、別のバージョンのSpring Bootを使う場合は、それに対応する<code>mybatis-spring-boot-starter</code>のバージョンを別途確認・指定してください。
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>② application.propertiesを変更する</h3>
+    <span class="diff-label before">変更前（削除）</span>
+    <pre><code>spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true</code></pre>
+    <span class="diff-label after">変更後（追加）</span>
+    <pre><code># XMLマッピングファイルの置き場所
+mybatis.mapper-locations=classpath:mapper/**/*.xml
+
+# エンティティクラスの短縮名（型エイリアス）を使えるようにするパッケージ
+mybatis.type-aliases-package=com.example.myapp.entity
+
+# テーブルのスネークケースをJavaのキャメルケースに自動変換する
+mybatis.configuration.map-underscore-to-camel-case=true</code></pre>
+    <p style="color:var(--muted);font-size:13px;">※ <code>spring.datasource.*</code>（H2の接続情報）と<code>spring.h2.console.*</code>はそのまま残します。</p>
+  </div>
+
+  <div class="steps-section">
+    <h3>③ schema.sqlを新規作成する</h3>
+    <p><code>src/main/resources/schema.sql</code> を新規作成します。Spring Bootは、ORM（JPA/MyBatis）の種類に関係なく、起動時にこのファイルを自動実行してくれます。</p>
+    <pre><code>CREATE TABLE book (
+    id     BIGINT       PRIMARY KEY AUTO_INCREMENT,
+    title  VARCHAR(255) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    price  INT          NOT NULL
+);</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>④ entity/Book.javaからJPAのアノテーションを外す</h3>
+    <p>MyBatisはアノテーションの有無に関係なく動作しますが、「JPAに依存しないプレーンなクラスである」ことを分かりやすくするため外しておきます。あわせて、採番されたIDをMyBatisがセットできるよう<code>setId()</code>を追加します。</p>
+    <span class="diff-label before">変更前（JPA）</span>
+    <pre><code>package com.example.myapp.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String title;
+    private String author;
+    private Integer price;
+
+    protected Book() {}
+    public Book(String title, String author, Integer price) {
+        this.title = title;
+        this.author = author;
+        this.price = price;
+    }
+
+    public Long getId() { return id; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
+}</code></pre>
+    <span class="diff-label after">変更後（MyBatis）</span>
+    <pre><code>package com.example.myapp.entity;
+
+public class Book {
+    private Long id;
+    private String title;
+    private String author;
+    private Integer price;
+
+    public Book() {}
+    public Book(String title, String author, Integer price) {
+        this.title = title;
+        this.author = author;
+        this.price = price;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }  // MyBatisが採番後のIDをセットするために必要
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
+}</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>⑤ repository/BookRepository.javaを削除し、BookMapperを作成する</h3>
+    <p><code>repository/BookRepository.java</code>を削除し（<code>repository</code>フォルダも不要になれば削除してください）、代わりに次の2ファイルを作成します。</p>
+    <span class="diff-label after">新規：mapper/BookMapper.java（src/main/java/com/example/myapp/mapper/）</span>
+    <pre><code>package com.example.myapp.mapper;
+
+import com.example.myapp.entity.Book;
+import org.apache.ibatis.annotations.Mapper;
+import java.util.List;
+
+@Mapper
+public interface BookMapper {
+    List&lt;Book&gt; findAll();
+    Book findById(Long id);
+    int insert(Book book);
+    int update(Book book);
+    int deleteById(Long id);
+}</code></pre>
+    <span class="diff-label after">新規：BookMapper.xml（src/main/resources/mapper/）</span>
+    <pre><code>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd"&gt;
+&lt;mapper namespace="com.example.myapp.mapper.BookMapper"&gt;
+
+  &lt;select id="findAll" resultType="Book"&gt;
+    SELECT * FROM book
+  &lt;/select&gt;
+
+  &lt;select id="findById" resultType="Book"&gt;
+    SELECT * FROM book WHERE id = #{id}
+  &lt;/select&gt;
+
+  &lt;insert id="insert" useGeneratedKeys="true" keyProperty="id"&gt;
+    INSERT INTO book (title, author, price)
+    VALUES (#{title}, #{author}, #{price})
+  &lt;/insert&gt;
+
+  &lt;update id="update"&gt;
+    UPDATE book
+    SET title = #{title}, author = #{author}, price = #{price}
+    WHERE id = #{id}
+  &lt;/update&gt;
+
+  &lt;delete id="deleteById"&gt;
+    DELETE FROM book WHERE id = #{id}
+  &lt;/delete&gt;
+
+&lt;/mapper&gt;</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>⑥ MyAppApplication.javaに@MapperScanを追加する</h3>
+    <span class="diff-label before">変更前</span>
+    <pre><code>@SpringBootApplication
+public class MyAppApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyAppApplication.class, args);
+    }
+}</code></pre>
+    <span class="diff-label after">変更後</span>
+    <pre><code>import org.mybatis.spring.annotation.MapperScan;
+
+@SpringBootApplication
+@MapperScan("com.example.myapp.mapper")
+public class MyAppApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyAppApplication.class, args);
+    }
+}</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>⑦ service/BookService.javaを書き換える</h3>
+    <p>呼び出し先が<code>bookRepository</code>から<code>bookMapper</code>に変わります。<code>save()</code>のようにINSERT/UPDATEを自動判別するメソッドはないため、登録は<code>insert()</code>、更新は<code>update()</code>とメソッドを分けて呼び出します。</p>
+    <span class="diff-label before">変更前（JPA）</span>
+    <pre><code>package com.example.myapp.service;
+
+import com.example.myapp.form.BookForm;
+import com.example.myapp.entity.Book;
+import com.example.myapp.exception.ResourceNotFoundException;
+import com.example.myapp.repository.BookRepository;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class BookService {
+
+    private final BookRepository bookRepository;
+
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+
+    public List&lt;Book&gt; findAll() {
+        return bookRepository.findAll();
+    }
+
+    public Book findById(Long id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -&gt; new ResourceNotFoundException("id=" + id + "の本が見つかりません"));
+    }
+
+    public Book create(BookForm form) {
+        Book book = new Book(form.getTitle(), form.getAuthor(), form.getPrice());
+        return bookRepository.save(book);
+    }
+
+    public Book update(Long id, BookForm form) {
+        Book book = findById(id);
+        book.setTitle(form.getTitle());
+        book.setAuthor(form.getAuthor());
+        book.setPrice(form.getPrice());
+        return bookRepository.save(book);
+    }
+
+    public void delete(Long id) {
+        Book book = findById(id);
+        bookRepository.delete(book);
+    }
+}</code></pre>
+    <span class="diff-label after">変更後（MyBatis）</span>
+    <pre><code>package com.example.myapp.service;
+
+import com.example.myapp.form.BookForm;
+import com.example.myapp.entity.Book;
+import com.example.myapp.exception.ResourceNotFoundException;
+import com.example.myapp.mapper.BookMapper;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class BookService {
+
+    private final BookMapper bookMapper;
+
+    public BookService(BookMapper bookMapper) {
+        this.bookMapper = bookMapper;
+    }
+
+    public List&lt;Book&gt; findAll() {
+        return bookMapper.findAll();
+    }
+
+    public Book findById(Long id) {
+        Book book = bookMapper.findById(id);
+        if (book == null) {
+            throw new ResourceNotFoundException("id=" + id + "の本が見つかりません");
+        }
+        return book;
+    }
+
+    public Book create(BookForm form) {
+        Book book = new Book(form.getTitle(), form.getAuthor(), form.getPrice());
+        bookMapper.insert(book);  // 実行後、book.getId()に採番されたIDが入る
+        return book;
+    }
+
+    public Book update(Long id, BookForm form) {
+        Book book = findById(id);  // 存在しなければここで例外が投げられる
+        book.setTitle(form.getTitle());
+        book.setAuthor(form.getAuthor());
+        book.setPrice(form.getPrice());
+        bookMapper.update(book);
+        return book;
+    }
+
+    public void delete(Long id) {
+        findById(id);  // 存在しなければここで例外が投げられる
+        bookMapper.deleteById(id);
+    }
+}</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>⑧ 動作確認</h3>
+    <p><code>controller/BookController.java</code>・<code>form/BookForm.java</code>・<code>exception/ResourceNotFoundException.java</code>・<code>exception/GlobalExceptionHandler.java</code>・<code>test.html</code>は変更不要です。そのままの状態で動作確認します。</p>
+    <ol>
+      <li>VSCodeのターミナルで <code>mvn spring-boot:run</code>、または IDEの実行ボタンからメインクラスを実行する</li>
+      <li>ブラウザで <code>http://localhost:8080/test.html</code> にアクセスし、Spring Boot編と同じ画面から一覧取得・詳細取得・新規登録・更新・削除を試す</li>
+    </ol>
+    <div class="callout">
+      <strong>おまけ</strong><br>
+      <code>http://localhost:8080/h2-console</code>（JDBC URL：<code>jdbc:h2:mem:testdb</code>）から、<code>schema.sql</code>で作成された<code>book</code>テーブルの中身を直接確認できます。
+    </div>
+  </div>
+
+  <h2>最終的なディレクトリ構成</h2>
+  <pre><code>my-app/
+├─ pom.xml
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/example/myapp/
+      │     ├─ MyAppApplication.java              … ⑥：@MapperScanを追加
+      │     ├─ entity/
+      │     │  └─ Book.java                       … ④：JPAアノテーションを除去
+      │     ├─ mapper/
+      │     │  └─ BookMapper.java                 … ⑤：新規（repositoryの代わり）
+      │     ├─ form/
+      │     │  └─ BookForm.java                   … 変更なし
+      │     ├─ service/
+      │     │  └─ BookService.java                … ⑦：bookMapper呼び出しに変更
+      │     ├─ controller/
+      │     │  └─ BookController.java             … 変更なし
+      │     └─ exception/
+      │        ├─ ResourceNotFoundException.java  … 変更なし
+      │        └─ GlobalExceptionHandler.java      … 変更なし
+      └─ resources/
+         ├─ application.properties            … ②：mybatis.*に変更
+         ├─ schema.sql                        … ③：新規
+         ├─ mapper/
+         │  └─ BookMapper.xml                 … ⑤：新規
+         └─ static/
+            └─ test.html                      … 変更なし</code></pre>
+  <p style="color:var(--muted);font-size:13px;">※ <code>repository/</code>フォルダ（<code>repository/BookRepository.java</code>）は⑤の手順で削除されるため、最終的な構成には残りません。</p>
+
+  <button class="back-link" onclick="window.close()">✕ このウィンドウを閉じる</button>
+
+</div>
+</body>
+</html>
