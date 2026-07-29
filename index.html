@@ -344,6 +344,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
 .learn-theme-card.springboot .learn-step-badge{background:rgba(109,179,63,.15);color:#6db33f;border:1px solid rgba(109,179,63,.4);}
 .learn-theme-card.mybatis .learn-step-badge{background:rgba(13,148,136,.15);color:#0d9488;border:1px solid rgba(13,148,136,.4);}
+.learn-theme-card.thymeleaf .learn-step-badge{background:rgba(62,167,90,.15);color:#3ea75a;border:1px solid rgba(62,167,90,.4);}
 .learn-theme-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.35);}
 .learn-theme-card.java{border-color:rgba(255,159,67,.4);}
 .learn-theme-card.java:hover{border-color:var(--orange);}
@@ -363,6 +364,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .learn-theme-card.springboot:hover{border-color:#6db33f;}
 .learn-theme-card.mybatis{border-color:rgba(13,148,136,.4);}
 .learn-theme-card.mybatis:hover{border-color:#0d9488;}
+.learn-theme-card.thymeleaf{border-color:rgba(62,167,90,.4);}
+.learn-theme-card.thymeleaf:hover{border-color:#3ea75a;}
 .html-preview{background:#fff;border:1px solid #ccc;border-radius:8px;overflow:hidden;margin:16px 0;}
 .html-preview-bar{background:#e5e5e5;padding:6px 14px;font-size:11px;color:#555;border-bottom:1px solid #ccc;}
 .html-preview-body{padding:16px 20px;color:#222 !important;font-family:sans-serif;font-size:14px;line-height:1.7;}
@@ -614,6 +617,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
               <div class="learn-theme-title">MyBatis</div>
               <div class="learn-theme-desc">Mapper・動的SQL・resultMap・アノテーションなど</div>
               <span class="learn-theme-count" style="color:#0d9488;background:rgba(13,148,136,.1)">0 章</span>
+            </div>
+            <div class="learn-theme-card thymeleaf" onclick="learnSelectTheme('thymeleaf')">
+              <div class="learn-step-badge">3</div>
+              <div class="learn-theme-icon">🌿</div>
+              <div class="learn-theme-title">Thymeleaf</div>
+              <div class="learn-theme-desc">変数式・繰り返し・フォーム連携・レイアウト分割など</div>
+              <span class="learn-theme-count" style="color:#3ea75a;background:rgba(62,167,90,.1)">0 章</span>
             </div>
           </div>
         </div>
@@ -8957,6 +8967,595 @@ public class BookController {
   7. INSERT実行後、採番されたIDが<code>book</code>オブジェクトにセットされ、結果が<code>ResponseEntity</code>としてJSONに変換されクライアントへ返る
 </div>
 <p>Spring Data JPAとMyBatis、どちらも「Javaオブジェクトとデータベースをつなぐ」という役割は同じですが、<strong>SQLをどこまで自分でコントロールしたいか</strong>によって使い分けます。両方の書き方を知っておくことで、案件ごとの技術選定にも対応しやすくなります。</p>`
+      },
+    ]
+  },
+  thymeleaf: {
+    label: 'Thymeleaf',
+    icon: '🌿',
+    color: '#3ea75a',
+    chapters: [
+      {
+        title: '1. Thymeleafとは / MVCでの画面表示のしくみ / 環境構築',
+        content: `
+<h3>Thymeleafとは何か</h3>
+<p><strong>Thymeleaf</strong>は、Javaで動くWebアプリケーションのための<strong>サーバーサイドテンプレートエンジン</strong>です。Spring Boot教材第3章で登場した<code>@Controller</code>が返す「画面の名前」は、実際にはこのThymeleafによってHTMLへと変換され、ブラウザに表示されます。</p>
+<div class="learn-point">
+  <strong>テンプレートエンジンとは</strong><br>
+  HTMLの雛形（テンプレート）の中に、サーバー側で用意した変数やループなどの「動的な部分」を埋め込み、リクエストのたびに最終的なHTMLを組み立てて返す仕組みです。
+</div>
+<p>Thymeleafの大きな特徴は、テンプレートファイル自体が<strong>そのままブラウザで開いても崩れずに表示できる「自然なテンプレート（Natural Templating）」</strong>であることです。<code>th:</code>から始まる属性はHTMLの標準的な属性ではないため、ブラウザはそれを無視し、要素にあらかじめ書かれているダミーの内容がそのまま表示されます。デザイナーが見た目を確認しながら作業しやすい、という利点があります。</p>
+
+<h3>復習：@Controller と @RestController</h3>
+<p>Spring Boot教材第3章で、<code>@RestController</code>は戻り値をそのままレスポンスの中身として返し、<code>@Controller</code>は戻り値を「表示する画面（View）の名前」として解釈すると学びました。ここから先の章では、この<code>@Controller</code>の使い方を実際に掘り下げていきます。</p>
+<pre><code>@Controller
+public class BookPageController {
+
+    @GetMapping("/books/list")
+    public String list() {
+        return "book-list"; // 画面の名前（ビュー名）
+    }
+}</code></pre>
+<div class="learn-point">
+  <strong>ビュー名からHTMLファイルへの変換ルール</strong><br>
+  Spring Bootに<code>spring-boot-starter-thymeleaf</code>が含まれていると、戻り値の<code>"book-list"</code>という文字列は、自動的に<code>classpath:/templates/book-list.html</code>というファイルに対応づけられます。この「先頭に付ける場所（prefix）」と「末尾に付ける拡張子（suffix）」の変換ルールを管理する部品を<strong>ViewResolver</strong>と呼びます。
+</div>
+
+<h3>環境構築：依存関係の追加</h3>
+<p>Spring BootでThymeleafを使うには、<code>spring-boot-starter-thymeleaf</code>という依存関係を<code>pom.xml</code>に追加します。</p>
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+<div class="learn-point">
+  <strong>spring-boot-starter-webとの関係</strong><br>
+  ThymeleafはあくまでView（画面）を組み立てる部品であり、HTTPリクエストの受け付け自体は第3章で学んだ<code>spring-boot-starter-web</code>が担当します。両方をあわせて依存関係に追加します。
+</div>
+
+<h3>テンプレートファイルの置き場所</h3>
+<p>デフォルトの設定では、テンプレートファイルは<code>src/main/resources/templates</code>フォルダの直下に置きます。CSSや画像などの静的ファイルは<code>src/main/resources/static</code>に置くという、Spring Bootの標準的なルールに沿っています。</p>
+<pre><code>src/main/resources/
+├── templates/
+│   └── book-list.html   ← "book-list" というビュー名に対応
+└── static/
+    └── css/
+        └── style.css</code></pre>
+
+<h3>最初のテンプレートを作ってみる</h3>
+<p>テンプレートのHTMLタグには、Thymeleafの属性を使えるようにするための名前空間宣言を追加します。</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ja" xmlns:th="http://www.thymeleaf.org"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;サンプル&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 th:text="'こんにちは、' + \${name} + 'さん'"&gt;こんにちは、ゲストさん&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<div class="learn-point">
+  <strong>xmlns:th の役割</strong><br>
+  <code>xmlns:th="http://www.thymeleaf.org"</code>は、このHTMLの中で<code>th:〇〇</code>という属性を使うことを宣言するものです。ブラウザ自体はこの宣言や<code>th:</code>属性の意味を理解しませんが、HTMLとして不正にはならないため、<strong>そのまま開いても壊れずに表示される</strong>のがポイントです（Thymeleafを通して処理されて初めて、<code>th:text</code>の内容に置き換わります）。
+</div>`
+      },
+      {
+        title: '2. 基本構文①：変数式とテキスト表示',
+        content: `
+<h3>Controllerからテンプレートへデータを渡す（Model）</h3>
+<p>Thymeleafのテンプレートで変数を使うには、Controller側で<code>Model</code>にデータを詰めて渡します。<code>Model</code>は、いわば「ControllerからViewへ届ける荷物」のようなものです。</p>
+<pre><code>@Controller
+public class GreetingController {
+
+    @GetMapping("/hello")
+    public String hello(Model model) {
+        model.addAttribute("name", "田中");
+        return "hello"; // templates/hello.html を表示
+    }
+}</code></pre>
+<div class="learn-point">
+  <strong>addAttributeの引数</strong><br>
+  第1引数がテンプレート側で使う<strong>変数名（キー）</strong>、第2引数が<strong>実際の値</strong>です。ここで付けた名前（<code>"name"</code>）が、そのままテンプレート内の<code>\${name}</code>に対応します。
+</div>
+
+<h3>th:text と変数式 \${...}</h3>
+<p><code>\${...}</code>は、Modelに入れた値をテンプレート内に埋め込むための<strong>変数式</strong>です。<code>th:text</code>属性に指定すると、その要素の中身（テキスト）が指定した値に置き換わります。</p>
+<pre><code>&lt;p th:text="\${name}"&gt;ここは表示用のダミーテキスト&lt;/p&gt;
+&lt;!-- 結果： &lt;p&gt;田中&lt;/p&gt; --&gt;</code></pre>
+<p>オブジェクトのプロパティにアクセスする場合は、Javaのgetterを介して<code>.</code>でつなぎます。</p>
+<pre><code>&lt;p th:text="\${book.title}"&gt;書籍タイトル&lt;/p&gt;
+&lt;!-- book.getTitle() の戻り値が表示される --&gt;</code></pre>
+
+<h3>th:text と th:utext（エスケープの有無）</h3>
+<p>Thymeleafは、初期状態では変数の値に含まれるHTMLタグ（<code>&lt;</code>や<code>&gt;</code>など）を、表示用の文字に自動変換します。これを<strong>エスケープ</strong>と呼びます。</p>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(62,167,90,.15);">
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">属性</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">エスケープ</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">用途</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:text</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">する（安全）</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">通常のテキスト表示。基本はこちらを使う</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:utext</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">しない</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">値自体にHTMLタグを含めて、そのまま反映したい場合のみ</td>
+    </tr>
+  </tbody>
+</table>
+<div class="learn-point" style="background:rgba(255,170,0,.1);border-left-color:#ffaa00;">
+  <strong style="color:#ffaa00;">th:utextはXSSのリスクがある</strong><br>
+  Webシステム教材「セキュリティ基礎」の章で学んだ<strong>XSS（クロスサイトスクリプティング）</strong>は、ユーザーが入力した文字列がそのままHTMLとして実行されてしまうことで起こります。<code>th:utext</code>はエスケープを行わないため、ユーザー入力を含む値には<strong>絶対に使わない</strong>ようにしてください。迷ったら常に<code>th:text</code>を使うのが安全です。
+</div>
+
+<h3>インライン式（参考）</h3>
+<p>タグの属性ではなく、テキストの途中に直接値を埋め込みたい場合は、<strong>インライン式</strong> <code>[[\${...}]]</code> を使うこともできます。</p>
+<pre><code>&lt;p&gt;こんにちは、[[\${name}]]さん&lt;/p&gt;</code></pre>
+<div class="learn-point">
+  <strong>基本はth:textを使う</strong><br>
+  インライン式は自然なテンプレート（ブラウザでそのまま開いたときの見た目）が崩れやすいという欠点があります。実務では、まずは<code>th:text</code>で書けないかを検討し、どうしても文中に埋め込みたい場合だけインライン式を使う、という使い分けが一般的です。
+</div>`
+      },
+      {
+        title: '3. 基本構文②：条件分岐と繰り返し',
+        content: `
+<h3>th:if / th:unless：条件によって表示を切り替える</h3>
+<p><code>th:if</code>は、指定した条件が<code>true</code>のときだけ、その要素（タグごと）を表示します。条件が<code>false</code>の場合、要素自体がHTMLに出力されません。</p>
+<pre><code>&lt;p th:if="\${stock &gt; 0}"&gt;在庫あり&lt;/p&gt;
+&lt;p th:unless="\${stock &gt; 0}"&gt;在庫なし&lt;/p&gt;</code></pre>
+<div class="learn-point">
+  <strong>th:unless は th:if の逆</strong><br>
+  <code>th:unless="条件"</code>は<code>th:if="!(条件)"</code>と同じ意味です。「〇〇でない場合に表示したい」という場面で使うと、否定の否定のような読みにくい書き方を避けられます。
+</div>
+
+<h3>th:switch / th:case：値によって分岐する</h3>
+<pre><code>&lt;div th:switch="\${status}"&gt;
+  &lt;p th:case="'ACTIVE'"&gt;公開中&lt;/p&gt;
+  &lt;p th:case="'DRAFT'"&gt;下書き&lt;/p&gt;
+  &lt;p th:case="*"&gt;不明なステータス&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+<div class="learn-point">
+  <strong>th:case="*" はdefaultにあたる</strong><br>
+  Javaの<code>switch</code>文の<code>default</code>と同じ役割で、どの<code>th:case</code>にも一致しなかった場合に表示されます。
+</div>
+
+<h3>th:each：一覧表示の基本</h3>
+<p>リストの中身を1件ずつ繰り返し表示するには<code>th:each</code>を使います。MyBatis教材で<code>BookMapper.findAll()</code>が返す<code>List&lt;Book&gt;</code>を、そのままテーブルの行として表示する例です。</p>
+<pre><code>&lt;table&gt;
+  &lt;tr th:each="book : \${books}"&gt;
+    &lt;td th:text="\${book.id}"&gt;1&lt;/td&gt;
+    &lt;td th:text="\${book.title}"&gt;タイトル&lt;/td&gt;
+    &lt;td th:text="\${book.author}"&gt;著者&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+<div class="learn-point">
+  <strong>th:each="変数名 : \${コレクション}"</strong><br>
+  <code>books</code>の要素数だけ、<code>&lt;tr&gt;</code>タグごと繰り返し出力されます。繰り返しの中では、<code>book</code>という変数名でその回の要素（1件分の<code>Book</code>）にアクセスできます。
+</div>
+
+<h3>繰り返しのステータス変数</h3>
+<p><code>th:each</code>には、繰り返し変数のあとにカンマ区切りで「ステータス変数」を指定できます。行の色を交互に変えたり、番号を振ったりする際に便利です。</p>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(62,167,90,.15);">
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">プロパティ</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">内容</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>index</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">0から始まる連番</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>count</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">1から始まる連番</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>size</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">要素の総数</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>even</code> / <code>odd</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">偶数番目/奇数番目かどうか（真偽値）</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>first</code> / <code>last</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">最初/最後の要素かどうか（真偽値）</td>
+    </tr>
+  </tbody>
+</table>
+<pre><code>&lt;tr th:each="book, status : \${books}"
+    th:class="\${status.odd} ? 'row-odd' : 'row-even'"&gt;
+  &lt;td th:text="\${status.count}"&gt;1&lt;/td&gt;
+  &lt;td th:text="\${book.title}"&gt;タイトル&lt;/td&gt;
+&lt;/tr&gt;</code></pre>
+<div class="learn-point">
+  <strong>三項演算子的な書き方</strong><br>
+  <code>\${条件} ? '真の場合の値' : '偽の場合の値'</code>という書き方は、Thymeleaf式の中でJavaの三項演算子のように使えます。<code>th:class</code>で行ごとにCSSクラスを切り替える、という場面でよく使われます。
+</div>`
+      },
+      {
+        title: '4. リンクとURL式・静的リソースの参照',
+        content: `
+<h3>なぜリンクを直接書いてはいけないか</h3>
+<p>HTMLのリンクをそのまま<code>&lt;a href="/books/3"&gt;</code>のように書いてしまうと、アプリケーションの配置場所（コンテキストパス）が変わったときに、すべてのリンクを書き換える必要が出てきます。Thymeleafでは、こうしたURLの組み立てを<strong>URL式（Link URL Expression）</strong>に任せることができます。</p>
+
+<h3>URL式 @{...}</h3>
+<pre><code>&lt;!-- 固定のパス --&gt;
+&lt;a th:href="@{/books}"&gt;本の一覧&lt;/a&gt;
+
+&lt;!-- パス変数を埋め込む --&gt;
+&lt;a th:href="@{/books/{id}(id=\${book.id})}"&gt;詳細を見る&lt;/a&gt;
+&lt;!-- 結果： /books/3 のようなURLになる --&gt;
+
+&lt;!-- クエリパラメータを付ける --&gt;
+&lt;a th:href="@{/books/search(keyword=\${keyword})}"&gt;検索結果&lt;/a&gt;
+&lt;!-- 結果： /books/search?keyword=Java のようなURLになる --&gt;</code></pre>
+<div class="learn-point">
+  <strong>@{}が自動でやってくれること</strong><br>
+  アプリケーションが<code>http://localhost:8080/myapp</code>のようにコンテキストパス付きで動いている場合でも、<code>@{}</code>を使っておけば<strong>先頭に自動でコンテキストパスを付け足してくれます</strong>。Spring Boot教材で学んだ<code>@PathVariable</code>や<code>@RequestParam</code>と、書き方の対応関係を意識すると理解しやすくなります。
+</div>
+
+<h3>th:href / th:src</h3>
+<p>URL式は、リンク（<code>&lt;a&gt;</code>）だけでなく、フォームの送信先（<code>&lt;form&gt;</code>）や画像・CSS・JSの参照先にも使います。属性ごとに使う<code>th:</code>属性が変わります。</p>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(62,167,90,.15);">
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">タグ</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">属性</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">用途</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>&lt;a&gt;</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:href</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">リンク先</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>&lt;form&gt;</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:action</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">送信先URL</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>&lt;img&gt; &lt;script&gt;</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:src</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">画像・JSファイルの参照先</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>&lt;link&gt;</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:href</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">CSSファイルの参照先</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>静的リソース（CSS/JS/画像）の参照</h3>
+<p>第1章で触れた通り、CSSや画像などの静的ファイルは<code>src/main/resources/static</code>配下に置きます。テンプレート側からは、そのフォルダをルート（<code>/</code>）とみなして参照します。</p>
+<pre><code>src/main/resources/static/
+└── css/
+    └── style.css   ← "/css/style.css" として参照できる</code></pre>
+<pre><code>&lt;link rel="stylesheet" th:href="@{/css/style.css}"&gt;</code></pre>
+<div class="learn-point">
+  <strong>th:hrefを使う理由</strong><br>
+  <code>href="/css/style.css"</code>と直接書いても動きますが、<code>th:href="@{/css/style.css}"</code>としておけば、リンクの場合と同様にコンテキストパスを自動で考慮してくれるため、環境が変わっても書き換えが不要になります。
+</div>`
+      },
+      {
+        title: '5. Controller ⇔ 画面のデータ連携',
+        content: `
+<h3>Model・一覧画面の例</h3>
+<p>第2章で学んだ<code>Model</code>を使って、MyBatisで取得した本の一覧を画面に渡してみましょう。</p>
+<pre><code>@Controller
+@RequestMapping("/books")
+public class BookViewController {
+
+    private final BookService bookService;
+
+    public BookViewController(BookService bookService) {
+        this.bookService = bookService;
+    }
+
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("books", bookService.findAll());
+        return "book-list";
+    }
+}</code></pre>
+<p>テンプレート側では、第3章で学んだ<code>th:each</code>を使ってそのまま一覧表示できます。</p>
+<pre><code>&lt;tr th:each="book : \${books}"&gt;
+  &lt;td th:text="\${book.title}"&gt;タイトル&lt;/td&gt;
+  &lt;td&gt;&lt;a th:href="@{/books/{id}(id=\${book.id})}"&gt;詳細&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;</code></pre>
+
+<h3>リダイレクトとPRGパターン</h3>
+<p>フォーム送信（POST）の処理が終わったあと、そのまま同じ内容を<code>return</code>してしまうと、ユーザーがブラウザの更新ボタンを押したときに<strong>同じPOSTリクエストが再送信され、二重登録が起きてしまう</strong>ことがあります。これを防ぐため、POST処理の最後には別のURLへ<strong>リダイレクト</strong>し、GETで一覧を取得し直すのが定石です。この設計を<strong>PRGパターン（Post/Redirect/Get）</strong>と呼びます。</p>
+<pre><code>@PostMapping
+public String create(BookForm form) {
+    bookService.create(form);
+    return "redirect:/books"; // "redirect:" を付けるとリダイレクトになる
+}</code></pre>
+<div class="learn-point">
+  <strong>redirect: を付けた場合の挙動の違い</strong><br>
+  通常の戻り値（<code>"book-list"</code>など）はViewResolverによってテンプレートとして解釈されますが、<code>"redirect:/books"</code>のように<strong>先頭に<code>redirect:</code>を付ける</strong>と、Thymeleafのテンプレートとしては解釈されず、ブラウザに対して<code>/books</code>への<strong>302リダイレクト</strong>を指示するレスポンスが返されます。
+</div>
+
+<h3>フラッシュ属性（RedirectAttributes）</h3>
+<p>リダイレクト先の画面に「登録しました」のようなメッセージを1回だけ表示したい場合、通常の<code>Model</code>ではリダイレクトを挟むとデータが消えてしまいます。そこで<code>RedirectAttributes</code>の<code>addFlashAttribute</code>を使います。</p>
+<pre><code>@PostMapping
+public String create(BookForm form, RedirectAttributes redirectAttributes) {
+    bookService.create(form);
+    redirectAttributes.addFlashAttribute("message", "登録しました");
+    return "redirect:/books";
+}</code></pre>
+<pre><code>&lt;p th:if="\${message}" th:text="\${message}"&gt;メッセージ&lt;/p&gt;</code></pre>
+<div class="learn-point">
+  <strong>Modelとの違い</strong><br>
+  <code>addFlashAttribute</code>で入れた値は、<strong>次の1回のリクエストだけ</strong>有効です。リダイレクト先の画面が表示された時点で自動的に破棄されるため、ブラウザを更新してもメッセージが残り続ける、といった不具合が起きません。
+</div>`
+      },
+      {
+        title: '6. フォーム連携',
+        content: `
+<h3>フォームバッキングBean</h3>
+<p>フォームに入力された値を受け取るためのクラスは、Spring Boot教材のREST APIで使った<code>BookForm</code>と同じ考え方です。画面用のフォームでは、このクラスを画面とControllerの間でやり取りする「入れ物」として使います。</p>
+<pre><code>public class BookForm {
+    private String title;
+    private String author;
+    private Integer price;
+
+    // getter/setterは省略
+}</code></pre>
+
+<h3>th:object と th:field</h3>
+<p><code>th:object</code>でフォーム全体が扱うオブジェクトを指定し、各入力欄では<code>th:field</code>でそのオブジェクトのどのプロパティと結びつくかを指定します。</p>
+<pre><code>&lt;form th:action="@{/books}" th:object="\${bookForm}" method="post"&gt;
+  &lt;label&gt;タイトル：&lt;input type="text" th:field="*{title}"&gt;&lt;/label&gt;
+  &lt;label&gt;著者：&lt;input type="text" th:field="*{author}"&gt;&lt;/label&gt;
+  &lt;label&gt;価格：&lt;input type="number" th:field="*{price}"&gt;&lt;/label&gt;
+  &lt;button type="submit"&gt;登録&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<div class="learn-point">
+  <strong>*{...} は th:object を起点にした「選択式」</strong><br>
+  <code>*{title}</code>は<code>\${bookForm.title}</code>の省略形のようなものです。<code>th:object</code>で指定したオブジェクトを起点に、プロパティ名だけで参照できます。
+</div>
+<p><code>th:field="*{title}"</code>を指定すると、Thymeleafが自動的に<code>id</code>・<code>name</code>・<code>value</code>属性を補ってくれます。</p>
+<pre><code>&lt;!-- 上のth:fieldは、実際には以下のように展開される --&gt;
+&lt;input type="text" id="title" name="title" value="（bookForm.getTitle()の値）"&gt;</code></pre>
+<div class="learn-point">
+  <strong>name属性が自動で付くことの意味</strong><br>
+  フォーム送信時、ブラウザは各入力欄の<code>name</code>属性をキーにして値を送信します。<code>th:field</code>が自動で付ける<code>name</code>が、Controller側で受け取るBookFormのプロパティ名と一致しているため、特別な設定なしにデータが結びつきます。
+</div>
+
+<h3>Controller側：フォーム表示と受け取り</h3>
+<p>「フォームを表示するGET」と「送信された内容を受け取るPOST」の2つのメソッドをセットで用意します。</p>
+<pre><code>@Controller
+@RequestMapping("/books")
+public class BookFormController {
+
+    private final BookService bookService;
+
+    public BookFormController(BookService bookService) {
+        this.bookService = bookService;
+    }
+
+    @GetMapping("/new")
+    public String newForm(Model model) {
+        model.addAttribute("bookForm", new BookForm()); // 空のフォーム
+        return "book-form";
+    }
+
+    @PostMapping
+    public String create(BookForm bookForm) {
+        bookService.create(bookForm);
+        return "redirect:/books";
+    }
+}</code></pre>
+<div class="learn-point">
+  <strong>GETで空のオブジェクトを渡しておく理由</strong><br>
+  <code>th:object="\${bookForm}"</code>は、画面が表示された時点で<code>bookForm</code>という名前のオブジェクトがModelに存在することを前提としています。新規登録画面であっても、値が空の<code>BookForm</code>インスタンスをあらかじめ渡しておく必要があります。
+</div>`
+      },
+      {
+        title: '7. バリデーションエラー表示と共通レイアウト',
+        content: `
+<h3>@Valid + BindingResultでの検証</h3>
+<p>Spring Boot教材第6章で、REST APIでは<code>@Valid</code>のチェックに失敗すると例外が発生し、グローバル例外ハンドラが400エラーを返す、という流れを学びました。画面遷移を伴うThymeleafのフォームでは、<strong>例外を発生させず、同じ入力画面にエラーメッセージ付きで戻す</strong>という異なる扱い方をします。</p>
+<pre><code>@PostMapping
+public String create(@Valid @ModelAttribute("bookForm") BookForm bookForm,
+                      BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+        return "book-form"; // 同じ入力画面に戻す（エラーが表示される）
+    }
+    bookService.create(bookForm);
+    return "redirect:/books";
+}</code></pre>
+<div class="learn-point">
+  <strong>BindingResultは検証対象の直後に置く</strong><br>
+  <code>BindingResult</code>は、必ず<code>@Valid</code>が付いた引数の<strong>直後</strong>に書く必要があります。間の順序を守らないと、Spring Bootが正しく検証結果を紐付けられず、実行時エラーになります。
+</div>
+
+<h3>エラーメッセージの表示（th:errors、#fields）</h3>
+<pre><code>&lt;form th:action="@{/books}" th:object="\${bookForm}" method="post"&gt;
+  &lt;label&gt;タイトル：
+    &lt;input type="text" th:field="*{title}"&gt;
+  &lt;/label&gt;
+  &lt;p th:if="\${#fields.hasErrors('title')}"
+     th:errors="*{title}"
+     style="color:red;"&gt;タイトルのエラー内容&lt;/p&gt;
+
+  &lt;button type="submit"&gt;登録&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<div class="learn-point">
+  <strong>#fields というユーティリティオブジェクト</strong><br>
+  <code>#fields.hasErrors('title')</code>は、<code>title</code>プロパティにエラーがあるかどうかを判定します。<code>th:errors="*{title}"</code>は、そのプロパティに対応するエラーメッセージ（<code>@NotBlank</code>などに設定したmessage）をまとめて表示します。
+</div>
+
+<h3>共通レイアウトの分割（th:fragment / th:insert / th:replace）</h3>
+<p>ヘッダーやフッターのように、複数の画面で繰り返し使うパーツは、1つのファイルに部品（フラグメント）として定義しておき、各画面から呼び出すことができます。</p>
+<pre><code>&lt;!-- fragments/common.html --&gt;
+&lt;footer th:fragment="footer"&gt;
+  &lt;p&gt;&amp;copy; 2026 My Book Shop&lt;/p&gt;
+&lt;/footer&gt;</code></pre>
+<pre><code>&lt;!-- book-list.html 側での呼び出し --&gt;
+&lt;div th:replace="~{fragments/common :: footer}"&gt;&lt;/div&gt;</code></pre>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(62,167,90,.15);">
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">属性</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">挙動</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:insert</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">呼び出し元のタグ（<code>&lt;div&gt;</code>）の<strong>内側</strong>にフラグメントを挿入する</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);"><code>th:replace</code></td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">呼び出し元のタグ<strong>ごと</strong>フラグメントの内容に置き換える</td>
+    </tr>
+  </tbody>
+</table>
+<div class="learn-point">
+  <strong>実務ではth:replaceが多用される</strong><br>
+  呼び出し元の<code>&lt;div&gt;</code>タグ自体が結果に残ってほしくないケースがほとんどのため、共通パーツの読み込みには<code>th:replace</code>を使うことが多いです。
+</div>`
+      },
+      {
+        title: '8. まとめ：Spring Boot + MyBatis + Thymeleafで画面付きCRUDアプリを作る',
+        content: `
+<h3>これまでの学習内容を1つに組み立てる</h3>
+<p>ここまでの章で、Thymeleafを構成する要素を1つずつ学んできました。最後に、Spring Boot／MyBatisの回で作成した「本の登録・一覧・更新・削除」を、今度は<strong>画面遷移のあるThymeleaf版</strong>として組み立ててみましょう。</p>
+<div class="learn-point">
+  <strong>🔧 実際に手を動かして構築する場合</strong><br>
+  MyBatis編で作成したプロジェクトに、Thymeleafの依存関係と画面ファイルを追加する手順を別ページにまとめています。<br>
+  → <a href="thymeleaf-setup.html" target="_blank" style="color:#3ea75a;font-weight:bold;">セットアップ手順を見る</a>
+</div>
+
+<h3>コントローラー（@Controllerの新規追加）</h3>
+<p>MyBatis編までに作った<code>BookController</code>は<code>@RestController</code> ＋ <code>@RequestMapping("/books")</code>としてすでに実装済みです。同じ<code>/books</code>に画面表示用の<code>@Controller</code>を追加すると、Spring Bootが「どちらのControllerを使えばよいか判断できない」というマッピング衝突を起こしてしまいます。そこで、画面用は<strong>別のクラス・別のパス（<code>/screen/books</code>）</strong>として追加し、既存のREST APIとは共存させます。DB操作を行うService層（<code>BookService</code>）は、MyBatis編で作ったものをそのまま流用できます。</p>
+<pre><code>@Controller
+@RequestMapping("/screen/books")
+public class BookViewController {
+
+    private final BookService bookService;
+
+    public BookViewController(BookService bookService) {
+        this.bookService = bookService;
+    }
+
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("books", bookService.findAll());
+        return "book-list";
+    }
+
+    @GetMapping("/new")
+    public String newForm(Model model) {
+        model.addAttribute("bookForm", new BookForm());
+        return "book-form";
+    }
+
+    @PostMapping
+    public String create(@Valid @ModelAttribute("bookForm") BookForm bookForm,
+                          BindingResult bindingResult,
+                          RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "book-form";
+        }
+        bookService.create(bookForm);
+        redirectAttributes.addFlashAttribute("message", "登録しました");
+        return "redirect:/screen/books";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        bookService.delete(id);
+        redirectAttributes.addFlashAttribute("message", "削除しました");
+        return "redirect:/screen/books";
+    }
+}</code></pre>
+<div class="learn-point">
+  <strong>削除がPOSTになっている理由</strong><br>
+  HTMLの<code>&lt;a&gt;</code>タグ（GETリクエスト）から直接削除処理を呼び出すことも可能ですが、GETは本来「取得」のためのメソッドであり、ブラウザのプリフェッチ（先読み）などで意図せず実行されてしまう危険があります。削除のような更新系の処理は、<strong>フォームからのPOST</strong>として実装するのが安全です。
+</div>
+
+<h3>一覧画面（book-list.html）</h3>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ja" xmlns:th="http://www.thymeleaf.org"&gt;
+&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;title&gt;本の一覧&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;本の一覧&lt;/h1&gt;
+  &lt;p th:if="\${message}" th:text="\${message}" style="color:green;"&gt;&lt;/p&gt;
+  &lt;a th:href="@{/screen/books/new}"&gt;新規登録&lt;/a&gt;
+  &lt;table border="1" cellpadding="6"&gt;
+    &lt;tr&gt;
+      &lt;th&gt;タイトル&lt;/th&gt;
+      &lt;th&gt;著者&lt;/th&gt;
+      &lt;th&gt;価格&lt;/th&gt;
+      &lt;th&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr th:each="book : \${books}"&gt;
+      &lt;td th:text="\${book.title}"&gt;タイトル&lt;/td&gt;
+      &lt;td th:text="\${book.author}"&gt;著者&lt;/td&gt;
+      &lt;td th:text="\${book.price}"&gt;価格&lt;/td&gt;
+      &lt;td&gt;
+        &lt;form th:action="@{/screen/books/{id}/delete(id=\${book.id})}" method="post" style="display:inline;"&gt;
+          &lt;button type="submit"&gt;削除&lt;/button&gt;
+        &lt;/form&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<h3>全体の処理の流れ</h3>
+<div class="learn-point">
+  <strong>新規登録画面から一覧に戻るまでの流れ</strong><br>
+  1. ブラウザが<code>GET /screen/books/new</code>にアクセスし、空の<code>BookForm</code>を持った登録画面が表示される<br>
+  2. ユーザーが入力して送信すると<code>POST /screen/books</code>が呼ばれる<br>
+  3. <code>@Valid</code>でエラーがあれば、同じ<code>book-form</code>画面にエラーメッセージ付きで戻る<br>
+  4. 問題なければ<code>BookService</code>・<code>BookMapper</code>を通してDBに登録される<br>
+  5. <code>RedirectAttributes</code>にメッセージを積んで<code>/screen/books</code>へリダイレクトする（PRGパターン）<br>
+  6. ブラウザが改めて<code>GET /screen/books</code>を発行し、最新の一覧とメッセージが表示される
+</div>
+
+<h3>REST API版とThymeleaf版の使い分け</h3>
+<p>Spring Boot・MyBatis編で作った<code>@RestController</code>によるJSON APIと、今回の<code>@Controller</code>＋Thymeleafによる画面表示は、どちらも同じService・Mapperの資産を使い回せます。違いは「Controllerから先（Viewの部分）を誰が担当するか」です。</p>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+  <thead>
+    <tr style="background:rgba(62,167,90,.15);">
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">観点</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">@RestController + JSON</th>
+      <th style="padding:6px 10px;text-align:left;border:1px solid rgba(62,167,90,.3);">@Controller + Thymeleaf</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">画面の実装場所</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">別のフロントエンド（React等）やJavaScript</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">サーバー側のテンプレート（HTML）</td>
+    </tr>
+    <tr style="background:rgba(62,167,90,.05);">
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">画面遷移</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">JavaScriptがfetchでAPIを呼び、画面を書き換える</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">サーバーがHTMLごと生成し、ブラウザが遷移する</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">向いている場面</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">スマホアプリ等、複数クライアントにデータを提供したい場合</td>
+      <td style="padding:6px 10px;border:1px solid rgba(62,167,90,.3);">社内システムなど、シンプルな画面遷移で完結する場合</td>
+    </tr>
+  </tbody>
+</table>
+<p>どちらの設計も実務で使われており、プロジェクトの要件（フロントエンドを別チームが担当するか、サーバーサイドだけで完結させたいか）に応じて選択します。両方の作り方を知っておくことで、案件ごとの技術選定にも対応しやすくなります。</p>`
       },
     ]
   }

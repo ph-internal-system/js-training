@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thymeleaf サンプル セットアップ手順</title>
+<style>
+  :root{
+    --bg:#1e2a3a; --surface:#28374a; --surface2:#304055; --surface3:#384a62;
+    --border:#445566; --text:#eef4ff; --muted:#8aadcc; --radius:10px;
+    --mono:'IBM Plex Mono',monospace; --sans:'Zen Kaku Gothic New',sans-serif;
+    --accent:#3ea75a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 20px 80px; background:var(--bg); color:var(--text);
+    font-family:var(--sans); line-height:1.8; font-size:15px;
+  }
+  .wrap{max-width:820px; margin:0 auto;}
+  .back-link{
+    display:inline-block; margin-bottom:24px; color:var(--muted); text-decoration:none;
+    font-size:14px; border:1px solid var(--border); border-radius:8px; padding:6px 14px;
+    background:transparent; font-family:var(--sans); cursor:pointer;
+  }
+  .back-link:hover{color:var(--accent); border-color:var(--accent);}
+  h1{
+    font-size:26px; margin:0 0 8px; color:var(--text);
+    display:flex; align-items:center; gap:10px;
+  }
+  h1 .leaf{font-size:28px;}
+  .subtitle{color:var(--muted); font-size:14px; margin:0 0 32px;}
+  h2{
+    font-size:18px; color:var(--accent); border-bottom:2px solid rgba(0,95,15,.3);
+    padding-bottom:8px; margin:40px 0 16px;
+  }
+  h3{font-size:15px; color:var(--text); margin:24px 0 10px;}
+  p{margin:0 0 14px;}
+  .callout{
+    background:rgba(0,95,15,.08); border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; font-size:14px;
+  }
+  .callout.warn{
+    background:rgba(255,170,0,.08); border-left-color:#ffaa00;
+  }
+  .callout strong{color:var(--accent);}
+  .callout.warn strong{color:#ffaa00;}
+  pre{
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:13px;
+    line-height:1.7; margin:14px 0;
+  }
+  code{font-family:var(--mono); font-size:0.92em;}
+  p code, li code, td code{
+    background:var(--surface2); padding:1px 6px; border-radius:4px; color:#8fdca5;
+  }
+  ol, ul{padding-left:22px; margin:0 0 14px;}
+  li{margin-bottom:6px;}
+  .steps-section{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 24px; margin-bottom:24px;
+  }
+  .steps-section h3{margin-top:0; color:var(--accent); font-size:16px;}
+  .diff-label{
+    display:inline-block; font-size:12px; font-weight:700; border-radius:4px;
+    padding:2px 8px; margin:10px 0 4px;
+  }
+  .diff-label.before{background:rgba(255,77,109,.15); color:#ff4d6d;}
+  .diff-label.after{background:rgba(0,95,15,.18); color:#3ea75a;}
+  .ref-box{
+    background:var(--surface2); border:1px dashed var(--border); border-radius:var(--radius);
+    padding:18px 22px; margin:20px 0;
+  }
+  .ref-box h3{margin-top:0; color:var(--muted); font-size:15px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th, td{padding:6px 10px; border:1px solid var(--border); text-align:left;}
+  th{background:rgba(0,95,15,.15);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <button class="back-link" onclick="window.close()">✕ このウィンドウを閉じる</button>
+
+  <h1><span class="leaf">🌿</span> Thymeleaf サンプル セットアップ手順</h1>
+  <p class="subtitle">「Thymeleaf」教材 第8章「まとめ：Spring Boot + MyBatis + Thymeleafで画面付きCRUDアプリを作る」の内容を、<strong>MyBatis編で作成したプロジェクトをそのまま流用</strong>しながら手元で動かすための手順です。</p>
+
+  <div class="ref-box">
+    <h3>前提</h3>
+    <p style="margin:0;">「MyBatis」教材のセットアップ手順（<code>mybatis-setup.html</code>）を完了し、<code>my-app</code>プロジェクトが動作する状態になっていることが前提です。<code>entity/Book.java</code>・<code>form/BookForm.java</code>・<code>service/BookService.java</code>・<code>mapper/BookMapper.java</code>・<code>BookMapper.xml</code>・<code>schema.sql</code>はすべてそのまま使い、画面表示に必要な部分だけを新しく追加します。</p>
+  </div>
+
+  <h2>何を再利用し、何を追加するか</h2>
+  <table>
+    <tr><th style="width:120px;">再利用（変更なし）</th><td><code>entity/Book.java</code> / <code>form/BookForm.java</code> / <code>service/BookService.java</code> / <code>mapper/BookMapper.java</code> / <code>mapper/BookMapper.xml</code> / <code>schema.sql</code> / <code>application.properties</code> / 既存の<code>controller/BookController.java</code>（REST API）</td></tr>
+    <tr><th>変更</th><td>pom.xml（Thymeleafの依存関係を追加）</td></tr>
+    <tr><th>新規追加</th><td><code>controller/BookViewController.java</code> / <code>templates/book-list.html</code> / <code>templates/book-form.html</code></td></tr>
+  </table>
+  <div class="callout">
+    <strong>既存のREST APIとURLが衝突しないようにする</strong><br>
+    既存の<code>BookController</code>は<code>@RestController</code> ＋ <code>@RequestMapping("/books")</code>でJSON APIを提供しています。同じ<code>/books</code>に対して画面表示用の<code>@Controller</code>を追加すると、Spring Bootが「どちらのControllerを使えばよいか判断できない」というエラー（マッピングの衝突）を起こします。そこでこの手順では、画面表示用のURLを<strong><code>/screen/books</code></strong>という別のパスにして、両方を共存させます。
+  </div>
+
+  <h2>実装手順</h2>
+
+  <div class="steps-section">
+    <h3>① pom.xmlに依存関係を追加する</h3>
+    <p>Thymeleafの依存関係を追加します。既存のSpring Web・Validation・H2 Database・MyBatisの依存関係はそのまま残します。</p>
+    <span class="diff-label after">追加</span>
+    <pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>② controller/BookViewController.javaを新規作成する</h3>
+    <p><code>src/main/java/com/example/myapp/controller/</code>に、画面遷移用の新しいControllerを追加します（既存の<code>BookController.java</code>はそのまま残します）。DB操作は<code>BookService</code>をそのまま呼び出すだけなので、MyBatis編からの変更は不要です。</p>
+    <span class="diff-label after">新規：controller/BookViewController.java</span>
+    <pre><code>package com.example.myapp.controller;
+
+import com.example.myapp.form.BookForm;
+import com.example.myapp.service.BookService;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequestMapping("/screen/books")
+public class BookViewController {
+
+    private final BookService bookService;
+
+    public BookViewController(BookService bookService) {
+        this.bookService = bookService;
+    }
+
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("books", bookService.findAll());
+        return "book-list";
+    }
+
+    @GetMapping("/new")
+    public String newForm(Model model) {
+        model.addAttribute("bookForm", new BookForm());
+        return "book-form";
+    }
+
+    @PostMapping
+    public String create(@Valid @ModelAttribute("bookForm") BookForm bookForm,
+                          BindingResult bindingResult,
+                          RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "book-form";
+        }
+        bookService.create(bookForm);
+        redirectAttributes.addFlashAttribute("message", "登録しました");
+        return "redirect:/screen/books";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        bookService.delete(id);
+        redirectAttributes.addFlashAttribute("message", "削除しました");
+        return "redirect:/screen/books";
+    }
+}</code></pre>
+    <div class="callout warn">
+      <strong>@Valid の対象クラスはMyBatis編のBookFormのまま</strong><br>
+      <code>form/BookForm.java</code>にはSpring Boot編ですでに<code>@NotBlank</code>・<code>@Min</code>が付いているため、このクラス自体の変更は不要です。REST API版では検証エラー時に例外がスローされましたが、画面版では<code>BindingResult</code>で結果を受け取り、エラーがあれば同じ入力画面に戻す、という違いに注意してください。
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>③ テンプレートを新規作成する</h3>
+    <p><code>src/main/resources/templates/</code>フォルダを作成し、以下の2ファイルを配置します。</p>
+    <span class="diff-label after">新規：templates/book-list.html</span>
+    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ja" xmlns:th="http://www.thymeleaf.org"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;本の一覧&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;本の一覧&lt;/h1&gt;
+  &lt;p th:if="${message}" th:text="${message}" style="color:green;"&gt;&lt;/p&gt;
+  &lt;a th:href="@{/screen/books/new}"&gt;新規登録&lt;/a&gt;
+  &lt;table border="1" cellpadding="6"&gt;
+    &lt;tr&gt;
+      &lt;th&gt;タイトル&lt;/th&gt;
+      &lt;th&gt;著者&lt;/th&gt;
+      &lt;th&gt;価格&lt;/th&gt;
+      &lt;th&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr th:each="book : ${books}"&gt;
+      &lt;td th:text="${book.title}"&gt;タイトル&lt;/td&gt;
+      &lt;td th:text="${book.author}"&gt;著者&lt;/td&gt;
+      &lt;td th:text="${book.price}"&gt;価格&lt;/td&gt;
+      &lt;td&gt;
+        &lt;form th:action="@{/screen/books/{id}/delete(id=${book.id})}" method="post" style="display:inline;"&gt;
+          &lt;button type="submit"&gt;削除&lt;/button&gt;
+        &lt;/form&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    <span class="diff-label after">新規：templates/book-form.html</span>
+    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ja" xmlns:th="http://www.thymeleaf.org"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;本の登録&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;本の登録&lt;/h1&gt;
+  &lt;form th:action="@{/screen/books}" th:object="${bookForm}" method="post"&gt;
+    &lt;div&gt;
+      &lt;label&gt;タイトル：&lt;input type="text" th:field="*{title}"&gt;&lt;/label&gt;
+      &lt;p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" style="color:red;"&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label&gt;著者：&lt;input type="text" th:field="*{author}"&gt;&lt;/label&gt;
+      &lt;p th:if="${#fields.hasErrors('author')}" th:errors="*{author}" style="color:red;"&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label&gt;価格：&lt;input type="number" th:field="*{price}"&gt;&lt;/label&gt;
+      &lt;p th:if="${#fields.hasErrors('price')}" th:errors="*{price}" style="color:red;"&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;button type="submit"&gt;登録&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;a th:href="@{/screen/books}"&gt;一覧に戻る&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  </div>
+
+  <div class="steps-section">
+    <h3>④ 動作確認</h3>
+    <ol>
+      <li>VSCodeのターミナルで <code>mvn spring-boot:run</code>、または IDEの実行ボタンからメインクラスを実行する</li>
+      <li>ブラウザで <code>http://localhost:8080/screen/books</code> にアクセスし、一覧画面が表示されることを確認する</li>
+      <li>「新規登録」リンクからフォーム画面に遷移し、タイトルを空欄のまま送信してバリデーションエラーが表示されることを確認する</li>
+      <li>正しく入力して登録し、一覧画面に「登録しました」というメッセージとともにリダイレクトされることを確認する</li>
+      <li>一覧の「削除」ボタンから、本が削除されて一覧が更新されることを確認する</li>
+    </ol>
+    <div class="callout">
+      <strong>おまけ</strong><br>
+      <code>http://localhost:8080/test.html</code>（REST API版）と<code>http://localhost:8080/screen/books</code>（Thymeleaf版）を見比べると、同じ<code>BookService</code>・<code>BookMapper</code>を使いながら、JSONを返すAPIと画面を返すMVCの両方を1つのプロジェクトで共存させられることが確認できます。
+    </div>
+  </div>
+
+  <h2>最終的なディレクトリ構成</h2>
+  <pre><code>my-app/
+├─ pom.xml                                … ①：thymeleaf依存を追加
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/example/myapp/
+      │     ├─ MyAppApplication.java
+      │     ├─ entity/
+      │     │  └─ Book.java                       … 変更なし
+      │     ├─ mapper/
+      │     │  └─ BookMapper.java                 … 変更なし
+      │     ├─ form/
+      │     │  └─ BookForm.java                   … 変更なし
+      │     ├─ service/
+      │     │  └─ BookService.java                … 変更なし
+      │     └─ controller/
+      │        ├─ BookController.java             … 変更なし（REST API、/books）
+      │        └─ BookViewController.java          … ②：新規（画面、/screen/books）
+      └─ resources/
+         ├─ application.properties
+         ├─ schema.sql
+         ├─ mapper/
+         │  └─ BookMapper.xml                 … 変更なし
+         ├─ templates/
+         │  ├─ book-list.html                 … ③：新規
+         │  └─ book-form.html                  … ③：新規
+         └─ static/
+            └─ test.html                      … 変更なし（REST API版の動作確認用）</code></pre>
+
+  <button class="back-link" onclick="window.close()">✕ このウィンドウを閉じる</button>
+
+</div>
+</body>
+</html>
